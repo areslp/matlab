@@ -4,6 +4,7 @@ function [ Z, W, E ] = l1_low_rank( X, beta, lambda, maxIter )
 
 [d,n]=size(X);
 m=n;
+fprintf(1,'n is %d\n',n);
 tol1 = 1e-4;%threshold for the error in constraint
 tol2 = 1e-5;%threshold for the change in the solutions
 
@@ -42,43 +43,38 @@ sv = 5;
 
 % main loop
 while true
-    
     tic;
     % update Z
     Zk_1=Z;
     T=Z+(A'*(X-AZ-E+Y1/mu)-(Z-W+Y2/mu))/eta1;
     % if choosvd(n, sv) == 1
-        % fprintf(1,'partial svd use lansvd\n');
+        % % fprintf(1,'partial svd use lansvd\n');
         % [U S V] = lansvd(T, sv, 'L');
     % else
-        % fprintf(1,'matlab svd\n');
+        % % fprintf(1,'matlab svd\n');
         % [U S V] = svd(T, 'econ');
     % end
     % diagS = diag(S);
-    % svp = length(find(diagS > (eta1*mu)^-1));
+    % svp = length(find(diagS > 1/(eta1*mu)));
     % if svp < sv
         % sv = min(svp + 1, n);
     % else
         % sv = min(svp + round(0.05*n), n);
     % end
-    % sv
-    % svp
-    % Z = U(:, 1:svp) * diag(diagS(1:svp) - 1/mu) * V(:, 1:svp)';
-    % t=toc;
-    % fprintf(1,'svd(partial) takes %f\n',t);
+    % Z = U(:, 1:svp) * diag(diagS(1:svp) - 1/(mu*eta1)) * V(:, 1:svp)';
 
-    [Z,svp]=singular_value_shrinkage(T,(eta1*mu)^-1);
-    Z=max(Z,0); % 在每一次迭代中将Z强制设置为非负的
+    [Z,svp]=singular_value_shrinkage(T,1/(eta1*mu));
+    Z=max(Z,0); % 在每�?��迭代中将Z强制设置为非负的
 
     AZ=A*Z;
     % update W
     Wk_1=W;
-    W=max(W,0);% 这里有非负限制，因为不考虑soft-threshold小于0的情况，所以先把负数置0
-    W=wthresh(Z+Y2/mu,'s',beta*(mu^-1)); 
+    W=max(W,0);% 这里有非负限制，因为不�?虑soft-threshold小于0的情况，�?��先把负数�?
+    W=wthresh(Z+Y2/mu,'s',beta*(1/mu)); 
     % W=max(wthresh(Z+Y2/mu,'s',beta*mu^-1),0); 
     % update E
     Ek_1=E;
-    E=l21(X-AZ+Y1/mu,lambda*(mu^-1));
+    E=l21(X-AZ+Y1/mu,lambda*(1/mu));
     
     % update lagrange multipliers
     Y1=Y1+mu*(X-AZ-E);
@@ -103,7 +99,7 @@ while true
     
     iter=iter+1;
     if iter==1 || mod(iter,50)==0 
-        fprintf(1,'iter %d,svp %d,t1 %f,t2 %f\n',iter,svp,t1,t2);
+        fprintf(1,'iter %d,svp %d,reconstruction error is %f,change error is %f\n',iter,svp,t1,t2);
     end
 
     % 判断中止条件

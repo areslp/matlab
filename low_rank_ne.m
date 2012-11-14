@@ -1,4 +1,4 @@
-function [ Z, E ] = low_rank( X, lambda, maxIter )
+function [ Z, E ] = low_rank( X, lambda, maxIter, A )
 %LOW_RANK Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -26,6 +26,11 @@ iter=0;
 while true
     if iter>MAX_ITER
         fprintf(1,'max iter num reached!\n');
+        h=figure('Visible', 'off');
+        imagesc(Z);
+        colormap(gray);
+        axis equal;
+        saveas(h,'tmp.png');
         break;
     end
     % 1. update J
@@ -34,6 +39,8 @@ while true
     J=singular_value_shrinkage(Y,tau);
     % 2. update Z
     Z=inv_x*(xtx-X'*E+J+(X'*Y1-Y2)/mu);
+    Z=max(Z,0); % 非负矩阵
+    Z=min(Z,A); % 邻接矩阵A
     % 3. update E
     tlambda=lambda/mu;
     Q=X-X*Z+Y1/mu;
@@ -50,7 +57,23 @@ while true
     % 6. check the convergence
     if max(max(abs(leq1)))<epsilon && max(max(abs(leq2)))<epsilon
         fprintf(1,'iter %d, convergenced\n', iter);
+        h=figure('Visible', 'off');
+        imagesc(Z);
+        colormap(gray);
+        axis equal;
+        saveas(h,'tmp.png');
+        % disp('press any key to continue');
+        % pause;
         break;
+    end
+    if mod(iter, 50)==0
+        % h=figure('Visible', 'off');
+        % imagesc(Z);
+        % colormap(gray);
+        % axis equal;
+        % saveas(h,'tmp.png');
+        disp(['iter ' num2str(iter) ' press any key to continue']);
+        % pause;
     end
     iter=iter+1;
 end

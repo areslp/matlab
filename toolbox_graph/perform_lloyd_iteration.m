@@ -10,7 +10,7 @@ function X = perform_lloyd_iteration(X,options)
 %
 %   You can give a local density using an image options.density
 %
-%   Copyright (c) Gabriel Peyr   
+%   Copyright (c) Gabriel Peyr?   
 
 options.null = 0;
 niter = getoptions(options, 'niter',1);
@@ -70,7 +70,7 @@ end
 X = X(:,1:n);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function A = compute_polygon_area(P)
+function A = compute_polygon_area(P) % each column -> a vertex
 
 P(:,end+1) = P(:,1);
 x = P(1,:);

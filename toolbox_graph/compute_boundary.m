@@ -1,4 +1,5 @@
-function boundary=compute_boundary(face, options)
+function bv=compute_boundary(face, options)
+% modified, since matlab7.1 same name of function and var is not allowed, so change the var boundary to bv(boundary vertex)
 
 % compute_boundary - compute the vertices on the boundary of a 3D mesh
 %
@@ -31,25 +32,31 @@ A=A+A';
 for i=1:nvert
     u=find(A(i,:)==1);
     if ~isempty(u)
-        boundary=[i u(1)];
+		fprintf(1,'the first boundary point found!\n');
+        bv=[i u(1)]; % edge [i,u(1)] is contained only in one face
         break;
     end
 end
 
-s=boundary(2);
+if ~exist('bv','var')
+	bv=[];
+	return;
+end
+
+s=bv(2);
 i=2;
 while(i<=nvert)
     u=find(A(s,:)==1);
     if length(u)~=2
         warning('problem in boundary');
     end
-    if u(1)==boundary(i-1)
+    if u(1)==bv(i-1)
         s=u(2);
     else
         s=u(1);
     end
-    if s~=boundary(1)
-        boundary=[boundary s];
+    if s~=bv(1)
+        bv=[bv s];
     else
         break;
     end
@@ -79,7 +86,7 @@ end
 if v<0
     error('No boundary found.');
 end
-boundary = [v];
+bv = [v];
 prev = -1;
 while true
     f = ring{v};
@@ -93,13 +100,13 @@ while true
         prev = v;
         v = f(end-1);
     end
-    if ~isempty( find(boundary==v) )
+    if ~isempty( find(bv==v) )
         % we have reach the begining of the boundary
-        if v~=boundary(1)
+        if v~=bv(1)
             warning('Begining and end of boundary doesn''t match.');
         else
             break;
         end
     end
-    boundary = [boundary,v];
+    bv = [bv,v];
 end

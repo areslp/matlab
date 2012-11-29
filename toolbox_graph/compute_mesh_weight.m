@@ -22,7 +22,7 @@ options.null = 0;
 [vertex,face] = check_face_vertex(vertex,face);
 
 nface = size(face,1);
-n = max(max(face));
+n = max(max(face)); % the max point index, equal to the point size
 
 verb = getoptions(options, 'verb', n>5000);
 
@@ -48,7 +48,7 @@ switch lower(type)
             for b = ring{i}
                 % b is a face adjacent to a
                 bf = face(:,b);
-                % compute complementary vertices
+                % compute complementary vertices, v contains points index in bf except i
                 if bf(1)==i
                     v = bf(2:3);
                 elseif bf(2)==i
@@ -65,9 +65,11 @@ switch lower(type)
                 % angles
                 alpha = myangle(vk-vi,vk-vj);
                 beta = myangle(vj-vi,vj-vk);
-                % add weight
-                W(i,j) = W(i,j) + cot( alpha );
-                W(i,k) = W(i,k) + cot( beta );
+                % add weight, modified as paper "On the Convergence of Metric and Geometric Properties of Polyhedral Surfaces"
+				% W(i,j) = W(i,j) + cot( alpha );
+                % W(i,k) = W(i,k) + cot( beta );
+                W(i,j) = W(i,j) + 0.5*cot( alpha );
+                W(i,k) = W(i,k) + 0.5*cot( beta );
             end
         end
     otherwise

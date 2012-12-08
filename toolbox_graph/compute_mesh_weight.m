@@ -66,15 +66,19 @@ switch lower(type)
                 alpha = myangle(vk-vi,vk-vj);
                 beta = myangle(vj-vi,vj-vk);
                 % add weight, modified as paper "On the Convergence of Metric and Geometric Properties of Polyhedral Surfaces"
-				% W(i,j) = W(i,j) + cot( alpha );
-                % W(i,k) = W(i,k) + cot( beta );
-                W(i,j) = W(i,j) + 0.5*cot( alpha );
-                W(i,k) = W(i,k) + 0.5*cot( beta );
+                W(i,j) = W(i,j) + cot( alpha );
+                W(i,k) = W(i,k) + cot( beta );
+                % W(i,j) = W(i,j) + 0.5*cot( alpha );
+                % W(i,k) = W(i,k) + 0.5*cot( beta );
             end
         end
     otherwise
         error('Unknown type.')
 end
+% sum(sum(abs(W-W')))
+% assert(sum(sum(abs(W-W')))<eps('double')); % make sure W is symmetry
+diagW=diag(W);
+assert(sum(abs(diagW))==0);
 
 if isfield(options, 'normalize') && options.normalize==1
     W = diag(sum(W,2).^(-1)) * W;

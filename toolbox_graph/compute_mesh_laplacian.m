@@ -35,7 +35,9 @@ options.normalize = 0;
 W = compute_mesh_weight(vertex,face,type,options);
 n = size(W,1);
 if symmetrize==1 && normalize==0
-    L = W - diag(sum(W,2));
+    % L = W - diag(sum(W,2));
+    disp('right here');
+    L = diag(sum(W,2)) - W;
 elseif symmetrize==1 && normalize==1
     L = speye(n) - diag(sum(W,2).^(-1/2)) * W * diag(sum(W,2).^(-1/2));
 elseif symmetrize==0 && normalize==1

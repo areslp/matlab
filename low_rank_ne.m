@@ -40,7 +40,7 @@ while true
     % 2. update Z
     Z=inv_x*(xtx-X'*E+J+(X'*Y1-Y2)/mu);
     Z=max(Z,0); % 非负矩阵
-    Z=min(Z,A); % 邻接矩阵A
+    Z=bsxfun(@times, Z, A); % pair-wise multiple, A is the spatial constraints matrix
     % 3. update E
     tlambda=lambda/mu;
     Q=X-X*Z+Y1/mu;

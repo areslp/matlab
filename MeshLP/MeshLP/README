@@ -1,0 +1,46 @@
+This file contains information about the MeshLP code which computes the Mesh
+Laplace operator based on the paper "Discrete Laplace Operator on Meshed
+Surfaces", Mikhail Belkin, Jian Sun and Yusu Wang, SoCG 2008.  The code is
+written by jian sun.  
+
+The source code as well as the binary code is distributed for Linux. 
+The source code is ready to be compiled on other platform though it
+is not tested. 
+
+DESCRIPTION
+	The MeshLP program reads an input off file that contains a triangle mesh
+	and compute the mesh laplace matrix. The program is written in C++, see
+	meshlpmatrix.h for the routines that compute the laplace matrix. 
+	It also provides matlab interface: symmshlp_matrix.m, which has self contained 
+	desription. eigens_msh.m gives an example on computing the eigenfunctions 
+	and eigenvalues of the laplace operator. 
+
+LEGAL TERMS
+	THIS SOFTWARE IS PROVIDED "AS-IS". THERE IS NO WARRANTY OF ANY KIND.
+   THE AUTHORS WILL BE LIABLE FOR ANY DAMAGES OF ANY KIND, EVEN IF ADVISED 
+	OF SUCH POSSIBILITY.
+ 
+   This software is copyrighted by Jian Sun (sunjian@stanford.edu)
+   This program is for academic research use only. 
+
+	This program uses geodesic (http://code.google.com/p/geodesic/)
+	It has the MIT license:
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+
+

@@ -1,0 +1,76 @@
+MATLAB_INC_DIR = /usr/local/matlab-R2009b/extern/include
+MATLAB_LIB_DIR1 = /usr/local/matlab-R2009b/bin/glnxa64
+MATLAB_LIB_DIR2 = /usr/local/matlab-R2009b/sys/os/glnxa64
+
+
+CXX = g++-4.1
+OBJ_EXT = .o
+SOBJ_EXT = .so
+OBJ_OPT = -c
+
+MEX        = mex
+MEXSUFFIX  = .mexa64
+MEXFLAGS   = -cxx CC='$(CXX)' CXX='$(CXX)' LD='$(CXX)'
+
+#---------------------------------------------------------------------#
+#                    compiler flags
+#---------------------------------------------------------------------#
+MATLAB_CXXFLAGS = \
+					-I$(MATLAB_INC_DIR)
+
+CXXFLAGS = \
+		-fPIC  \
+		$(MATLAB_CXXFLAGS)	\
+	   -O2
+
+#---------------------------------------------------------------------#
+#                    linker flags
+#---------------------------------------------------------------------#
+LDFLAGS_SO = \
+
+LDFLAGS_MAT = \
+			  -L$(MATLAB_LIB_DIR1) -lmat -leng -lut -lmx  -licuuc -licudata -licui18n -licuio -lhdf5 \
+			  -lpthread 
+
+#			  -L./ -lmeshlpmatrix \
+
+#--------------------------------------------------------------------#
+#                    target entries
+#---------------------------------------------------------------------#
+
+
+all:  \
+		symmshlpmatrix$(MEXSUFFIX)  \
+		cotlpmatrix$(MEXSUFFIX)  
+
+OBJ	=  \
+   			tmesh$(OBJ_EXT)     		\
+				comp_meshlpmatrix$(OBJ_EXT)		\
+				meshlpmatrix$(OBJ_EXT) \
+				offobj$(OBJ_EXT) \
+				point$(OBJ_EXT) \
+				matrix$(OBJ_EXT) 
+
+symmshlpOBJ   =  \
+            symmshlpmatrix$(OBJ_EXT)
+
+symmshlpmatrix$(MEXSUFFIX): $(symmshlpOBJ) $(OBJ) 
+	mex $(LDFLAGS_MAT) $(MEXFLAGS) $(symmshlpOBJ)  $(OBJ)
+
+cotlpOBJ   =  \
+				cotlpmatrix$(OBJ_EXT)          
+
+cotlpmatrix$(MEXSUFFIX): $(cotlpOBJ)  $(OBJ)
+	mex $(LDFLAGS_MAT) $(MEXFLAGS) $(cotlpOBJ)  $(OBJ)
+
+clean:	
+		rm -f  $(OBJ) $(mshlpOBJ) $(cotlpOBJ) $(symmshlpOBJ) 
+
+#---------------------------------------------------------------------#
+#                    suffix rules
+#---------------------------------------------------------------------#
+
+
+.C$(OBJ_EXT):
+	$(CXX) $(CXXFLAGS) $(OBJ_OPT) $<
+

@@ -125,8 +125,8 @@ else
     h = patch('vertices',vertex,'faces',face,'FaceVertexCData',face_vertex_color, 'FaceColor',shading_type);
 end
 colormap gray(256);
-% lighting phong;
-% camlight infinite; 
+lighting phong;
+camlight infinite; 
 camproj('perspective');
 axis square; 
 axis off;

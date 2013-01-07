@@ -123,7 +123,7 @@ while ~convergenced
     % update Z_i
     for i=1:k
         Zk{i}=Z{i};
-        Z{i}=reshape(M(i,:),n,n)';
+        Z{i}=reshape(ZZ(i,:),n,n)';
     end
     % update E_i
     for i=1:k

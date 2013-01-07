@@ -31,6 +31,8 @@ function [V] = baseline_spectral_onkernel(K,numClust,projev)
     opts.disp = 0;
     [V E] = eigs(L,ceil(numEV),'LA',opts);  
     U = V(:,1:ceil(numClust*1));
+    % fprintf(1,'single view E:\n');
+    % E
     
     %[U E] = eig(L);   
     %[E1 I] = sort(diag(E));  %sort in increasing order

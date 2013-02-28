@@ -36,6 +36,8 @@ end
 V = cell(num_views,1);
 for i=1:num_views
     [V{i}] = mybaseline_spectral_onkernel(K(:,:,i),numClust,projev);
+    % TODO:
+    % [V{i}] = mybaseline_spectral_onkernel(K(:,:,i),2,projev);
 end
 
 X = V;
@@ -53,6 +55,8 @@ for i=1:numiter
         Y_norm(:,:,j) = Y(:,:,j);
         opts.disp = 0;
         [X{j}] = mybaseline_spectral_onkernel(Y_norm(:,:,j),numClust,projev);    
+        % TODO:
+        % [X{j}] = mybaseline_spectral_onkernel(Y_norm(:,:,j),2,projev);    
     end                
 end 
 

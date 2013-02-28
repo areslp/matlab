@@ -82,6 +82,11 @@ ZJc=cell(k,1);
 ZSc=cell(k,1);
 
 
+sv=cell(k,1);
+for i=1:k
+    sv{i}=0;
+end
+
 svp=cell(k,1);
 for i=1:k
     svp{i}=0;
@@ -97,6 +102,7 @@ while ~convergenced
         fprintf(1,'max iter num reached!\n');
         break;
     end
+    tic
     % update J_i
     for i=1:k
         Jk{i}=J{i};
@@ -104,11 +110,16 @@ while ~convergenced
         J{i}=JT;
         svp{i}=svpt;
     end
+    t=toc;
+    fprintf(1,'singular_value_shrinkage takes %f\n',t);
     % update S_i
+    tic
     for i=1:k
         Sk{i}=S{i};
         S{i}=invx{i}*(xtx{i}-X{i}'*E{i}+Z{i}+(X{i}'*Y{i}+V{i}-W{i})/mu);
     end
+    t=toc;
+    fprintf(1,'update S takes %f\n',t);
     % update Z
     for i=1:k
         Zk{i}=Z{i};

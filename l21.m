@@ -1,16 +1,7 @@
-function [ W ] = l21( Q, lambda )
-%L21 Summary of this function goes here
-%   Detailed explanation goes here
-
-W=zeros(size(Q,1),size(Q,2));
-
-for i=1:size(Q,2)
-    qi=Q(:,i);
-    if lambda<norm(qi)
-        W(:,i)=(norm(qi)-lambda)/norm(qi)*qi;
-    else
-        W(:,i)=0;
-    end
-end
-end
-
+function [ M ] = l21( Q, lambda )
+QN=sqrt(sum(Q.^2,1));
+% assert(length(find(QN<=0))==0);
+coefficient=(QN-lambda)./QN;
+invalid=find(coefficient<=0);
+coefficient(invalid)=0;
+M=bsxfun(@times,Q,coefficient);

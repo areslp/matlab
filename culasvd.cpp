@@ -2,9 +2,12 @@
 #include "cula_lapack.hpp"
 #include "culamex.hpp"
 #include "iostream"
+#include "windows.h"
 
 using std::max;
 using std::min;
+using std::cout;
+using std::endl;
 
 // Complex conjugation of complex data
 template<class T> void Conjugate(T* a) { /* Do nothing */ };
@@ -21,6 +24,7 @@ void mexCulaGesvd(int nlhs,           /* number of expected outputs */
               mxClassID id,
               mxComplexity complexity)
 {
+    unsigned long t1,t2;
     // Function core, details in "Using CULA in MATLAB, Part 2"
     // culaGesvd(...)
     // Initialize flags and types
@@ -34,6 +38,7 @@ void mexCulaGesvd(int nlhs,           /* number of expected outputs */
     int K = min(M,N);
     int L = max(M,N);
  
+    t1=GetTickCount();
     // Allocate a temporary to not destroy input data
     T* A = (T*) mxMalloc( M * N * sizeof(T) );
  
@@ -72,19 +77,32 @@ void mexCulaGesvd(int nlhs,           /* number of expected outputs */
         U = (T*) mxMalloc( M * M * sizeof(T) );
         VT = (T*) mxMalloc( N * N * sizeof(T) );
     }
- 
+    t2=GetTickCount();
+    cout<<"memory preparation takes:"<<t2-t1<<endl;
+    // culaStatus status;
     // Initialize CULA
+    t1=GetTickCount();
     culaStatus status = culaInitialize();
     checkStatus(status, "culaInitialize");
+    t2=GetTickCount();
+    cout<<"culaInitialize takes:"<<t2-t1<<endl;
+
  
     // CULA SVD Factorization
+    t1=GetTickCount();
     status = culaGesvd('A', 'A', M, N, A, M, SVEC, U, M, VT, N);
     checkStatus(status, "culaGesvd");
+    t2=GetTickCount();
+    cout<<"culaGesvd takes:"<<t2-t1<<endl;
  
     // Shutdown CULA
+    t1=GetTickCount();
     culaShutdown();
+    t2=GetTickCount();
+    cout<<"culaShutdown takes:"<<t2-t1<<endl;
  
     // Get pointer to output matrix, S
+    t1=GetTickCount();
     RealType* S = (RealType*) mxGetPr( plhs[1] );
  
     // Copy SVEC to diagonal of S
@@ -122,6 +140,8 @@ void mexCulaGesvd(int nlhs,           /* number of expected outputs */
     // Free allocate data
     mxFree(A);
     mxFree(SVEC);
+    t2=GetTickCount();
+    cout<<"output and clear takes:"<<t2-t1<<endl;
 
 }
  

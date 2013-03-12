@@ -1,4 +1,4 @@
-N=400;
+N=4096;
 A=rand(N);
 tic;
 [u,s,v]=culasvd(A);

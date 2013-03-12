@@ -42,7 +42,7 @@ tol2 = 1e-5;%threshold for the change in the solutions
 opt.tol = tol2;%precision for computing the partial SVD
 opt.p0 = ones(n,1);
 
-maxIter = 1000;
+maxIter = 2000;
 
 max_mu = 1e10;
 norm2X = norm(X,2);

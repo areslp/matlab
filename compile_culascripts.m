@@ -1,0 +1,1 @@
+mex( ['-I' getenv('CULA_INC_PATH')], ['-L' getenv('CULA_LIB_PATH_64')], '-lcula_core','-lcula_lapack', 'culasvd.cpp' )

@@ -7,6 +7,7 @@ else
     % fprintf(1,'matlab svd\n');
     [U S V] = svd(X, 'econ');
 end
+% [U S V] = svd(X, 'econ');
 diagS = diag(S);
 svp = length(find(diagS > tau));
 if svp < sv

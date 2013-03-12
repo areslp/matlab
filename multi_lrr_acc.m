@@ -96,7 +96,7 @@ F=cell(k,1);
 
 M=cell(k,1);
 
-MAX_ITER=1000;
+MAX_ITER=2000;
 iter=0;
 convergenced=false;
 

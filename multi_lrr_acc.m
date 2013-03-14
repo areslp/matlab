@@ -58,7 +58,9 @@ end
 mu=1e-6;
 max_mu=10^10;
 rho=1.9;
-epsilon=1e-4;
+% epsilon=1e-4;
+% epsilon2=1e-5; % must be small!
+epsilon=1e-6;
 epsilon2=1e-5; % must be small!
 
 % pre caculate matrix value
@@ -96,7 +98,7 @@ F=cell(k,1);
 
 M=cell(k,1);
 
-MAX_ITER=2000;
+MAX_ITER=1000;
 iter=0;
 convergenced=false;
 
@@ -108,6 +110,7 @@ tic
 while ~convergenced
     if iter>MAX_ITER
         fprintf(1,'max iter num reached!\n');
+        save_matrix(J,S,Z,F);
         break;
     end
     cmu=cell(k,1);
@@ -131,6 +134,10 @@ while ~convergenced
         Zk{i}=Z{i};
         Z{i}=reshape(ZZ(i,:),n,n)';
     end
+
+    % TODO: for debug
+    % print_matrix(J,S,Z,F,svp,mu);
+
     % update E_i
     Ek=E;
     [E]=cellfun(@updateE,X,S,Y,cmu,clambda,'UniformOutput',false);
@@ -164,6 +171,7 @@ while ~convergenced
             fprintf(1,'svp%d %d,',i,svp{i});
         end
         fprintf(1,'\n');
+        save_matrix(J,S,Z,F);
     end
     % update multipliers
     [Y]=cellfun(@updateY,Y,cmu,Xc,'UniformOutput',false);
@@ -245,3 +253,44 @@ function result = errorfun(S, varargin)
    warning(S.identifier, S.message);
    result = NaN;
 
+function [] = save_matrix(J,S,Z,F)
+    k=length(J);
+    % TODO: for debug
+    for i=1:k
+        h=figure('Visible', 'off');
+        imagesc(S{i});
+        colormap(gray);
+        axis equal;
+        saveas(h,['S' num2str(i) '.png']);
+    end
+    for i=1:k
+        h=figure('Visible', 'off');
+        imagesc(Z{i});
+        colormap(gray);
+        axis equal;
+        saveas(h,['Z' num2str(i) '.png']);
+    end
+    for i=1:k
+        h=figure('Visible', 'off');
+        imagesc(J{i});
+        colormap(gray);
+        axis equal;
+        saveas(h,['J' num2str(i) '.png']);
+    end
+    for i=1:k
+        h=figure('Visible', 'off');
+        imagesc(F{i});
+        colormap(gray);
+        axis equal;
+        saveas(h,['F' num2str(i) '.png']);
+    end
+
+function [] = print_matrix(J,S,Z,F,svp,mu)
+    % TODO: for debug
+    k=length(J);
+    for i=1:k
+        [aa bb1 cc]=svd(Z{i});
+        [aa bb2 cc]=svd(S{i});
+        [aa bb3 cc]=svd(F{i});
+        fprintf(1,'Z%d rank %d,S%d rank %d,F%d rank %d,J%d rank is %d\n',i,length(find(diag(bb1)>1/mu)),i,length(find(diag(bb2)>1/mu)),i,length(find(diag(bb3)>1/mu)),i,svp{i});
+    end

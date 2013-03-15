@@ -192,7 +192,17 @@ toc
 % svp{i}=svpt;
 % sv{i}=svt;
 function [J, svp, sv] = updateJ(Z,W,mu,sv)
-    [J,svp,sv]=singular_value_shrinkage_acc(Z+W/mu,1/mu,sv);
+    % [J,svp,sv]=singular_value_shrinkage_acc(Z+W/mu,1/mu,sv);
+    [J,svp]=singular_value_shrinkage(Z+W/mu,1/mu); % TODO: sometimes PROPACK is slower than full svd, and sometimes it will throw the following error
+    % Error using vertcat
+    % CAT arguments dimensions are not consistent.
+
+    % Error in lansvd (line 228)
+    % [S,bot] = bdsqr(diag(B),[diag(B,-1); resnrm]);
+
+    % Error in singular_value_shrinkage_acc (line 5)
+    % [U S V] = lansvd(X, sv, 'L');
+
 
 % S{i}=invx{i}*(xtx{i}-X{i}'*E{i}+Z{i}+(X{i}'*Y{i}+V{i}-W{i})/mu);
 function [S] = updateS(invx,xtx,X,E,Z,Y,V,W,mu)
@@ -200,7 +210,11 @@ function [S] = updateS(invx,xtx,X,E,Z,Y,V,W,mu)
 
 % F{i}=(J{i}+S{i}-(W{i}+V{i})*mu)/2;
 function [F] = updateF(J,S,W,V,mu)
-    F=(J+S-(W+V)*mu)/2;
+    % add normalize
+    T1=J-W/mu;
+    T2=S-V/mu;
+    % F=(J+S-(W+V)*mu)/2; % TODO: fix bug, not *mu, should be /mu
+    F=(T1+T2)/2;
 
 % M{i}=reshape(F{i}',1,n*n);
 function [M] = updateM(F)

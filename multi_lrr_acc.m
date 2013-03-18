@@ -213,6 +213,9 @@ function [F] = updateF(J,S,W,V,mu)
     % add normalize
     T1=J-W/mu;
     T2=S-V/mu;
+    % TODO: normalize not work
+    % T1=mnormalize_col(T1);
+    % T2=mnormalize_col(T2);
     % F=(J+S-(W+V)*mu)/2; % TODO: fix bug, not *mu, should be /mu
     F=(T1+T2)/2;
 

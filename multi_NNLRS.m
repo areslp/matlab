@@ -1,28 +1,28 @@
-function [] = multi_NNLRS(X,lambda,beta,alpha)
+function [Z,ZZ,E] = multi_NNLRS(X,lambda,beta,alpha)
 % init vars
 k=length(X);
 [m,n]=size(X{1});
 
 Z=cell(k,1);
-Z{1:k}=zeros(n);
+Z(1:k)={zeros(n)};
 E=cell(k,1);
-E{1:k}=zeros(m,n)
+E(1:k)={zeros(m,n)};
 S=cell(k,1);
-S{1:k}=zeros(n);
+S(1:k)={zeros(n)};
 J=cell(k,1);
-J{1:k}=zeros(n);
+J(1:k)={zeros(n)};
 Y1=cell(k,1);
-Y1{1:k}=zeros(m,n);
+Y1(1:k)={zeros(m,n)};
 Y2=cell(k,1);
-Y2{1:k}=zeros(n);
+Y2(1:k)={zeros(n)};
 Y3=cell(k,1);
-Y3{1:k}=zeros(n);
+Y3(1:k)={zeros(n)};
 Zk=Z;
 Ek=E;
 Sk=S;
 Jk=J;
 svp=cell(k,1);
-svp{1:k}=0;
+svp(1:k)={0};
 F=Z;
 ZZ=zeros(k,n*n);
 
@@ -64,7 +64,9 @@ MAX_ITER=1000;
 iter=0;
 convergenced=false;
 clambda=cell(k,1);
-clambda{1:k}=lambda;
+clambda(1:k)={lambda};
+cbeta=cell(k,1);
+cbeta(1:k)={beta};
 
 while ~convergenced
     if iter>MAX_ITER
@@ -78,7 +80,7 @@ while ~convergenced
     [S, svp]=cellfun(@updateS,xtx,X,E,Y1,Z,S,Sk,Y3,eta1,cmu,'UniformOutput',false);
     % update J_i
     Jk=J;
-    [J]=cellfun(@updateJ,Z,J,Y2,cmu,'UniformOutput',false);
+    [J]=cellfun(@updateJ,Z,J,Y2,cmu,cbeta,'UniformOutput',false);
     % update Z
     [F]=cellfun(@updateF,J,Y2,S,Y3,cmu,'UniformOutput',false);
     [M]=cellfun(@updateM,F,'UniformOutput',false);
@@ -142,7 +144,7 @@ function [S,svp] = updateS(xtx,X,E,Y1,Z,S,Sk,Y3,eta1,mu)
     % argmin_{S} 1/(mu*eta1)||S||_*+1/2*||S-S_k+T/(mu*eta1)||_F^2
     [S,svp]=singular_value_shrinkage(Sk-T/(mu*eta1),1/(mu*eta1)); % TODO: sometimes PROPACK is slower than full svd, and sometimes it will throw the following error
 
-function [J] = updateJ(Z,J,Y2,mu)
+function [J] = updateJ(Z,J,Y2,mu,beta)
     J=wthresh(Z+Y2/mu,'s',2*beta); 
 
 function [RET] = updateF(J,Y2,S,Y3,mu)

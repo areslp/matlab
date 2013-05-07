@@ -64,13 +64,15 @@ while true
     % Z = U(:, 1:svp) * diag(diagS(1:svp) - 1/(mu*eta1)) * V(:, 1:svp)';
 
     [Z,svp]=singular_value_shrinkage(T,1/(eta1*mu));
-    Z=max(Z,0); % 在每�?��迭代中将Z强制设置为非负的
+    Z=max(Z,0); % convex 
+    % Z=Z-diag(diag(Z)); % TODO: not tested, added 2013-03-28 diag(Z)=0
 
     AZ=A*Z;
     % update W
     Wk_1=W;
-    W=max(W,0);% 这里有非负限制，因为不�?虑soft-threshold小于0的情况，�?��先把负数�?
+    W=max(W,0);
     W=wthresh(Z+Y2/mu,'s',beta*(1/mu)); 
+    % W=W-diag(diag(W)); % TODO: not tested, added 2013-03-28 diag(W)=0
     % W=max(wthresh(Z+Y2/mu,'s',beta*mu^-1),0); 
     % update E
     Ek_1=E;

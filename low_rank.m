@@ -14,7 +14,7 @@ Y2=zeros(n,n);
 
 mu=1e-6;
 max_mu=10^10;
-rho=1.1;
+rho=1.9;
 epsilon=1e-8;
 
 xtx=X'*X;
@@ -25,15 +25,19 @@ iter=0;
 
 while true
     if iter>MAX_ITER
-        fprintf(1,'max iter num reached!\n');
+        % fprintf(1,'max iter num reached!\n');
         break;
     end
     % 1. update J
+    % tic
     Y=Z+Y2/mu;
     tau=1/mu;
     J=singular_value_shrinkage(Y,tau);
+    % toc
+    % J=max(J,0);
     % 2. update Z
     Z=inv_x*(xtx-X'*E+J+(X'*Y1-Y2)/mu);
+    % Z=max(Z,0);
     % 3. update E
     tlambda=lambda/mu;
     Q=X-X*Z+Y1/mu;
@@ -49,7 +53,7 @@ while true
     mu=min(rho*mu,max_mu);
     % 6. check the convergence
     if max(max(abs(leq1)))<epsilon && max(max(abs(leq2)))<epsilon
-        fprintf(1,'iter %d, convergenced\n', iter);
+        % fprintf(1,'iter %d, convergenced\n', iter);
         break;
     end
     iter=iter+1;

@@ -66,7 +66,7 @@ end
 % U
 % size(U)
 C = kmeans(U, kmean, 'start', 'cluster', ...
-                 'EmptyAction', 'singleton', 'Display', 'final', 'MaxIter', 200);
+                 'EmptyAction', 'singleton', 'Display', 'off', 'MaxIter', 200);
              
 % now convert C to a n-by-k matrix containing the k indicator
 % vectors as columns

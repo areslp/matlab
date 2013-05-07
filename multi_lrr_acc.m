@@ -133,6 +133,8 @@ while ~convergenced
     for i=1:k
         Zk{i}=Z{i};
         Z{i}=reshape(ZZ(i,:),n,n)';
+        % Z{i}=Z{i}-diag(diag(Z{i}));
+        Z{i}=max(Z{i},0);
     end
 
     % TODO: for debug
@@ -194,6 +196,8 @@ toc
 function [J, svp, sv] = updateJ(Z,W,mu,sv)
     % [J,svp,sv]=singular_value_shrinkage_acc(Z+W/mu,1/mu,sv);
     [J,svp]=singular_value_shrinkage(Z+W/mu,1/mu); % TODO: sometimes PROPACK is slower than full svd, and sometimes it will throw the following error
+    % J=J-diag(diag(J));
+    J=max(J,0);
     % Error using vertcat
     % CAT arguments dimensions are not consistent.
 
@@ -207,6 +211,8 @@ function [J, svp, sv] = updateJ(Z,W,mu,sv)
 % S{i}=invx{i}*(xtx{i}-X{i}'*E{i}+Z{i}+(X{i}'*Y{i}+V{i}-W{i})/mu);
 function [S] = updateS(invx,xtx,X,E,Z,Y,V,W,mu)
     S=invx*(xtx-X'*E+Z+(X'*Y+V-W)/mu);
+    % S=S-diag(diag(S));
+    S=max(S,0);
 
 % F{i}=(J{i}+S{i}-(W{i}+V{i})*mu)/2;
 function [F] = updateF(J,S,W,V,mu)

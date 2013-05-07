@@ -94,13 +94,15 @@ while ~convergenced
         MM(i,:)=M{i};
     end
     ZZ=l21(MM,alpha/(2*mu));
-    if alpha==0
-        assert(nnz(ZZ-MM)==0);
-    end
+    % if alpha==0
+        % assert(nnz(ZZ-MM)==0);
+    % end
     % update Z_i
     Zk=Z;
     for i=1:k
         Z{i}=reshape(ZZ(i,:),n,n)';
+        % Z{i}=Z{i}-diag(diag(Z{i}));
+        % Z{i}=max(Z{i},0);
     end
     % update E_i
     Ek=E;
@@ -141,6 +143,7 @@ while ~convergenced
     if gap < epsilon2
         mu=min(rho*mu,max_mu);
     end
+    % save_matrix(J,S,Z,iter);
     iter=iter+1;
 end
 
@@ -150,9 +153,13 @@ function [S,svp] = updateS(xtx,X,E,Y1,Z,S,Y3,eta1,mu)
     T=-mu*(xtx-xtx*S-X'*E+X'*Y1/mu+Z-S+Y3/mu);
     % argmin_{S} 1/(mu*eta1)||S||_*+1/2*||S-S_k+T/(mu*eta1)||_F^2
     [S,svp]=singular_value_shrinkage(S-T/(mu*eta1),1/(mu*eta1)); % TODO: sometimes PROPACK is slower than full svd, and sometimes it will throw the following error
+    % S=S-diag(diag(S));
+    % S=max(S,0);
 
 function [J] = updateJ(Z,J,Y2,mu,beta)
     J=wthresh(Z+Y2/mu,'s',beta/mu); 
+    % J=J-diag(diag(J));
+    % J=max(J,0);
 
 function [F] = updateF(J,Y2,S,Y3,mu)
     F=0.5*(J-Y2/mu+S-Y3/mu);
@@ -188,3 +195,7 @@ function [Y2] = updateY2(Y2,mu,ZJc)
 
 function [Y3] = updateY3(Y3,mu,ZSc)
     Y3=Y3+mu*ZSc;
+
+
+function [] = save_matrix(J,S,Z,iter)
+    save(['m' num2str(iter) '.mat'],'J','S','Z');

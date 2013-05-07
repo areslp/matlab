@@ -42,7 +42,7 @@ tol2 = 1e-5;%threshold for the change in the solutions
 opt.tol = tol2;%precision for computing the partial SVD
 opt.p0 = ones(n,1);
 
-maxIter = 2000;
+maxIter = 1000;
 
 max_mu = 1e10;
 norm2X = norm(X,2);
@@ -57,16 +57,18 @@ eta = norm2X*norm2X*1.02;%eta needs to be larger than ||X||_2^2, but need not be
 % intialize
 E = sparse(d,n);
 Y = zeros(d,n);
+% Z = zeros(n, n);
+
 
 %the initial guess of the rank of Z is 5.
-A.U = zeros(n,5);%the left singluar vectors of Z
-A.s = zeros(5,1);%the singular values of Z
-A.V = zeros(n,5);%the right singular vectors of Z
+sv = 1;
+svp = sv;
+A.U = zeros(n,sv);%the left singluar vectors of Z
+A.s = zeros(sv,1);%the singular values of Z
+A.V = zeros(n,sv);%the right singular vectors of Z
 
 XZ = zeros(d,n);%XZ = X*Z;
 
-sv = 5;
-svp = sv;
 
 %% Start main loop
 convergenced = 0;
@@ -83,32 +85,37 @@ while iter<maxIter
     Ek = E;
     Ak = A;
     
-    E = solve_l1l2(X - XZ + Y/mu,lambda/mu);
+    % E = solve_l1l2(X - XZ + Y/mu,lambda/mu);
+    E = l21(X - XZ + Y/mu,lambda/mu);
     
     %-----------Using PROPACK--------------%
-    M = X - E + Y/mu;
-    
-    [U, S, V] = lansvd('Axz','Atxz', n, n, sv, 'L', opt);
-    %[U, S, V] = lansvd('Axz','Atxz', n, n, sv, 'L');
+    % tic
+    M = A.U*diag(A.s)*A.V' + X'*(X - XZ - E + Y/mu)/eta;
 
-    S = diag(S);
-    svp = length(find(S>1/(mu*eta)));
-    if svp < sv
-        sv = min(svp + 1, n);
-    else
-        sv = min(svp + round(0.05*n), n);
-    end
+    [A.U,A.s,A.V]=singular_value_shrinkage_implicit(M,1/(mu*eta));
     
-    if svp>=1
-        S = S(1:svp)-1/(mu*eta);
-    else
-        svp = 1;
-        S = 0;
-    end
-    %Z = A.U*diag(A.s)*A.V', but we never explicitly form Z until outputing it at the end
-    A.U = U(:, 1:svp);
-    A.s = S;
-    A.V = V(:, 1:svp);
+    % [U, S, V] = lansvd('Axz','Atxz', n, n, sv, 'L', opt);
+    % %[U, S, V] = lansvd('Axz','Atxz', n, n, sv, 'L');
+
+    % S = diag(S);
+    % svp = length(find(S>1/(mu*eta)));
+    % if svp < sv
+        % sv = min(svp + 1, n);
+    % else
+        % sv = min(svp + round(0.05*n), n);
+    % end
+    
+    % if svp>=1
+        % S = S(1:svp)-1/(mu*eta);
+    % else
+        % svp = 1;
+        % S = 0;
+    % end
+    % %Z = A.U*diag(A.s)*A.V', but we never explicitly form Z until outputing it at the end
+    % A.U = U(:, 1:svp);
+    % A.s = S;
+    % A.V = V(:, 1:svp);
+    % toc
     
     %compute ||Z-Zk||_F = sqrt(||Z||_F^2 + ||Zk||_F^2 - 2 tr(Z'*Zk))
     % = sqrt(norm(A.s)^2 + norm(Ak.s)^2 - 2 tr(A.V*diag(A.s)*A.U'*Ak.U*diag(Ak.s)*Ak.V') )
@@ -150,9 +157,9 @@ while iter<maxIter
     else
         Y = Y + mu*dY;
         
-        if mu*relChg < tol2
+        % if mu*relChg < tol2
             mu = min(max_mu, mu*rho);
-        end
+        % end
     end
 end
 

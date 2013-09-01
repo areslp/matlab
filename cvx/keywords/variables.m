@@ -17,13 +17,15 @@ function variables( varargin )
 %
 %   See also VARIABLE, DUAL, DUALS.
 
-if ~iscellstr( varargin ),
-    error( 'VARIABLES must be used in command mode.' );
+if nargin < 1,
+    error( 'Incorrect syntax for VARIABLES. Type HELP VARIABLES for details.' );
+elseif ~iscellstr( varargin ),
+    error( 'All arguments must be strings.' );
 end
 for k = 1 : nargin,
-    evalin( 'caller', [ 'variable ', varargin{k} ] );
+	evalin( 'caller', [ 'variable ', varargin{k} ] );
 end
 
-% Copyright 2012 CVX Research, Inc. 
+% Copyright 2005-2013 CVX Research, Inc. 
 % See the file COPYING.txt for full copyright information.
 % The command 'cvx_where' will show where this file is located.

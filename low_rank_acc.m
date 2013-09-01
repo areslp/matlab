@@ -1,6 +1,6 @@
 function [ Z, E ] = low_rank( X, lambda, maxIter )
-%LOW_RANK Summary of this function goes here
-%   Detailed explanation goes here
+% solve min ||J||_* + \lambda ||E||_2,1 s.t. X=XZ+E, Z=J
+
 % TODO: acc as LRR
 P=orth(X'); % nxr
 r=size(P,2);
@@ -9,7 +9,7 @@ A=X*P; % 3xr
 % fprintf(1,'r is %d\n',r);
 
 
-% solve min ||Z||_* + \lambda ||E||_2,1 s.t. X=AZ+E
+% solve min ||J||_* + \lambda ||E||_2,1 s.t. X=AZ+E, Z=J
 % A 3xr
 % X 3xn
 % Z rxn

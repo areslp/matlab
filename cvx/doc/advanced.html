@@ -1,0 +1,725 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Advanced topics &mdash; CVX Users&#39; Guide</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0 (beta)',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="CVX Users&#39; Guide" href="index.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="Support" href="support.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="license.html" title="License"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="support.html" title="Support"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="advanced-topics">
+<span id="advanced"></span><h1>Advanced topics<a class="headerlink" href="#advanced-topics" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In this section we describe a number of the more advanced capabilities
+of CVX. We recommend that you <em>skip</em> this section at first, until
+you are comfortable with the basic capabilities described above.</p>
+</div>
+<div class="section" id="eliminating-quadratic-forms">
+<span id="quad-forms"></span><h2>Eliminating quadratic forms<a class="headerlink" href="#eliminating-quadratic-forms" title="Permalink to this headline">¶</a></h2>
+<p>One particular reformulation that we <em>strongly</em> encourage is to eliminate quadratic
+forms&#8212;that is, functions like <tt class="docutils literal"><span class="pre">sum_square</span></tt>, <tt class="docutils literal"><span class="pre">sum(square(.))</span></tt> or <tt class="docutils literal"><span class="pre">quad_form</span></tt>&#8212;whenever
+it is possible to construct equivalent models using <tt class="docutils literal"><span class="pre">norm</span></tt> instead.
+Our experience tells us that quadratic forms often pose a numerical challenge for
+the underlying solvers that CVX uses.</p>
+<p>We acknowledge that this advice goes against conventional wisdom: quadratic forms
+are the prototypical smooth convex function, while norms are nonsmooth and therefore
+unwieldy. But with the <em>conic</em> solvers that CVX uses, this wisdom is <em>exactly backwards</em>.
+It is the <em>norm</em> that is best suited for conic formulation and solution. Quadratic forms
+are handled by <em>converting</em> them to a conic form&#8212;using norms, in fact! This conversion
+process poses some interesting scaling challenges. It is better if the modeler can eliminate
+the need to perform this conversion.</p>
+<p>For a simple example of such a change, consider the objective</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( sum_square( A * x - b ) )
+</pre></div>
+</div>
+<p>In exact arithmetic, this is precisely equivalent to</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( square_pos( norm( A * x - b ) ) )
+</pre></div>
+</div>
+<p>But equivalence is also preserved if we eliminate the square altogether:</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( norm( A * x - b ) )
+</pre></div>
+</div>
+<p>The optimal value of <tt class="docutils literal"><span class="pre">x</span></tt> is identical in all three cases, but this last version is
+likely to produce more accurate results. Of course, if you <em>need</em> the value of the
+squared norm, you can always recover it by squaring the norm after the fact.</p>
+<p>Conversions using <tt class="docutils literal"><span class="pre">quad_form</span></tt> can sometimes be a bit more difficult. For instance, consider</p>
+<div class="highlight-none"><div class="highlight"><pre>quad_form( A * x - b, Q ) &lt;= 1
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">Q</span></tt> is a positive definite matrix. The equivalent <tt class="docutils literal"><span class="pre">norm</span></tt> version is</p>
+<div class="highlight-none"><div class="highlight"><pre>norm( Qsqrt * ( A * x - b ) ) &lt;= 1
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">Qsqrt</span></tt> is an appropriate matrix square root of <tt class="docutils literal"><span class="pre">Q</span></tt>. One option is to compute
+the symmetric square root <tt class="docutils literal"><span class="pre">Qsqrt</span> <span class="pre">=</span> <span class="pre">sqrtm(Q)</span></tt>, but this computation destroys sparsity.
+If <tt class="docutils literal"><span class="pre">Q</span></tt> is sparse, it is likely worth the effort to compute a sparse Cholesky-based
+square root:</p>
+<div class="highlight-none"><div class="highlight"><pre>[ Qsqrt, p, S  ] = chol( Q );
+Qsqrt = Qsqrt * S;
+</pre></div>
+</div>
+<p>Sometimes an effective reformulation requires a practical understanding of what it
+means for problems to be equivalent. For instance, suppose we wanted to add an
+<span class="math">\(\ell_1\)</span> regularization term to the objective above, weighted by some fixed,
+positive <tt class="docutils literal"><span class="pre">lambda</span></tt>:</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( sum_square( A * x - b ) + lambda * norm( x, 1 ) )
+</pre></div>
+</div>
+<p>In this case, we typically do not care about the <em>specific</em> values of <tt class="docutils literal"><span class="pre">lambda</span></tt>; rather
+we are varying it over a range to study the tradeoff between the residual of <tt class="docutils literal"><span class="pre">A*x-b</span></tt>
+and the 1-norm of <tt class="docutils literal"><span class="pre">x</span></tt>. The same tradeoff can be studied by examining this modified model:</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( norm( A * x - b ) + lambda2 * norm( x, 1 ) )
+</pre></div>
+</div>
+<p>This is not precisely the same model; setting <tt class="docutils literal"><span class="pre">lambda</span></tt> and <tt class="docutils literal"><span class="pre">lambda2</span></tt> to the same value
+will not yield identical values of <tt class="docutils literal"><span class="pre">x</span></tt>. But both models <em>do</em> trace the same tradeoff
+curve&#8212;only the second form is likely to produce more accurate results.</p>
+</div>
+<div class="section" id="indexed-dual-variables">
+<span id="indexed-dual"></span><h2>Indexed dual variables<a class="headerlink" href="#indexed-dual-variables" title="Permalink to this headline">¶</a></h2>
+<p>In some models, the <em>number</em> of constraints depends on the model
+parameters&#8212;not just their sizes. It is straightforward to build such
+models in CVX using, say, a Matlab <tt class="docutils literal"><span class="pre">for</span></tt> loop. In order to assign
+each of these constraints a separate dual variable, we must find a way
+to adjust the number of dual variables as well. For this reason, CVX
+supports <em>indexed dual variables</em>. In reality, they are simply standard
+Matlab cell arrays whose entries are CVX dual variable objects.</p>
+<p>Let us illustrate by example how to declare and use indexed dual
+variables. Consider the following semidefinite program from the
+<a class="reference external" href="http://sedumi.ie.lehigh.edu">SeDuMi</a> examples:</p>
+<div class="math">
+\[\begin{split}\begin{array}{ll}
+        \text{minimize} &amp; \sum_{i=1}^n (n-i) X_{ii} \\
+        \text{subject to} &amp; \sum_{i=1}^n X_{i,i+k} = b_k, ~ k = 1,2,\dots,n \\
+        &amp; X \succeq 0
+\end{array}\end{split}\]</div>
+<p>This problem minimizes a weighted sum of the main diagonal of a positive
+semidefinite matrix, while holding the sums along each diagonal
+constant. The parameters of the problem are the elements of the vector
+<span class="math">\(b\in\mathbf{R}^n\)</span>, and the optimization variable is a symmetric
+matrix <span class="math">\(X\in\mathbf{R}^{n\times n}\)</span>. The CVX version of this
+model is</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_begin
+    variable X( n, n ) symmetric
+    minimize( ( n - 1 : -1 : 0 ) * diag( X ) );
+    for k = 0 : n-1,
+        sum( diag( X, k ) ) == b( k+1 );
+    end
+    X == semidefinite(n);
+cvx_end
+</pre></div>
+</div>
+<p>If we wish to obtain dual information for the <span class="math">\(n\)</span> simple equality
+constraints, we need a way to assign each constraint in the <tt class="docutils literal"><span class="pre">for</span></tt> loop
+a separate dual variable. This is accomplished as follows:</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_begin
+    variable X( n, n ) symmetric
+    dual variables y{n}
+    minimize( ( n - 1 : -1 : 0 ) * diag( X ) );
+    for k = 0 : n-1,
+        sum( diag( X, k ) ) == b( k+1 ) : y{k+1};
+    end
+    X == semidefinite(n);
+cvx_end
+</pre></div>
+</div>
+<p>The statement <tt class="docutils literal"><span class="pre">dual</span> <span class="pre">variables</span> <span class="pre">y{n}</span></tt> allocates a cell array of
+<span class="math">\(n\)</span> dual variables, and stores the result in the Matlab variable
+<tt class="docutils literal"><span class="pre">Z</span></tt>. The equality constraint in the <tt class="docutils literal"><span class="pre">for</span></tt> loop has been augmented
+with a reference to <tt class="docutils literal"><span class="pre">y{k+1}</span></tt>, so that each constraint is assigned a
+separate dual variable. When the <tt class="docutils literal"><span class="pre">cvx_end</span></tt> command is issued, CVX
+will compute the optimal values of these dual variables, and deposit
+them into an <span class="math">\(n\)</span>-element cell array <tt class="docutils literal"><span class="pre">y</span></tt>.</p>
+<p>This example admittedly is a bit simplistic. With a bit of careful
+arrangement, it is possible to rewrite this model so that the <span class="math">\(n\)</span>
+equality constraints can be combined into a single vector constraint,
+which in turn would require only a single vector dual variable. <a class="footnote-reference" href="#id5" id="id1">[3]</a>
+For a more complex example that is not amenable to such a
+simplification, see the file</p>
+<div class="highlight-none"><div class="highlight"><pre>examples/cvxbook/Ch07_statistical_estim/cheb.m
+</pre></div>
+</div>
+<p>in the CVX distribution. In that problem, each constraint in the
+<tt class="docutils literal"><span class="pre">for</span></tt> loop is a linear matrix inequality, not a scalar linear
+equation; so the indexed dual variables are symmetric matrices, not
+scalars.</p>
+</div>
+<div class="section" id="the-successive-approximation-method">
+<span id="successive"></span><h2>The successive approximation method<a class="headerlink" href="#the-successive-approximation-method" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you were referred to this web page by CVX&#8217;s warning message: welcome!
+Please read this section carefully
+to fully understand why using functions like <cite>log</cite>, <a href="#id2"><span class="problematic" id="id3">`</span></a>exp&#8217;, etc.
+within CVX models requires special care.</p>
+</div>
+<p>Prior to version 1.2, the functions <tt class="docutils literal"><span class="pre">exp</span></tt>, <tt class="docutils literal"><span class="pre">log</span></tt>, <tt class="docutils literal"><span class="pre">log_det</span></tt>,
+and other functions from the exponential family could not be used within
+CVX. Unfortunately, CVX utilizes symmetric primal/dual solvers that
+simply cannot support those functions natively, and a variety of factors
+prevent us from incorporating other types of solvers into CVX.</p>
+<p>Nevertheless, support for these functions was requested quite frequently.
+For this reason, we constructed a <em>successive approximation</em> heuristic that
+allows the symmetric primal/dual solvers to support the exponential
+family of functions. A precise description of the approach is beyond the
+scope of this text, but roughly speaking, the method proceeds as follows:</p>
+<ol class="arabic simple">
+<li>Choose an initial approximation centerpoint <span class="math">\(x_c=0\)</span>.</li>
+<li>Construct a polynomial approximation for each log/exp/entropy term
+which is accurate in the neighborhood of <span class="math">\(x_c\)</span>.</li>
+<li>Solve this approximate model to obtain its optimal point <span class="math">\(\bar{x}\)</span>.</li>
+<li>If <span class="math">\(\bar{x}\)</span> satisfies the optimality conditions for
+the <em>orignal</em> model to sufficient precision, exit.</li>
+<li>Otherwise, shift <span class="math">\(x_c\)</span> towards <span class="math">\(\bar{x}\)</span>, and repeat steps 2-5.</li>
+</ol>
+<p>Again, this is a highly simplified description of the
+approach; for instance, we actually employ both the primal and dual
+solutions to guide our judgements for shifting <span class="math">\(x_c\)</span> and
+terminating.</p>
+<p>This approach has proven surprisingly effective for many problems.
+<em>However, as with many heuristic approaches, it
+is not perfect.</em> It will sometimes fail to converge even for problems known to have solutions.
+Even when it does converge, it is several times slower than the standard solver,
+due to its iterative approach. Therefore, it is best to use it sparingly and carefully.
+Here are some specific usage tips:</p>
+<ul>
+<li><p class="first">First, confirm that the log/exp/entropy terms are truly necessary for your model. In
+many cases, an exactly equivalent model can be constructed without them, and that should
+always be preferred. For instance, the constraint</p>
+<div class="highlight-none"><div class="highlight"><pre>sum_log(x) &gt;= 10
+</pre></div>
+</div>
+<p>can be expressed in terms of the <cite>geo_mean</cite> function as</p>
+<div class="highlight-none"><div class="highlight"><pre>geo_mean(x) &gt;= log(10)^(1/length(x))
+</pre></div>
+</div>
+<p>Many determinant maximization problems are commonly written using <cite>log_det</cite>, but in
+fact that is often unnecessary. For instance, consider the objective</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( log_det(X) )
+</pre></div>
+</div>
+<p>CVX actually converts this internally to this:</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( n*log(det_rootn(X)) )
+</pre></div>
+</div>
+<p>So what you can do instead is simply remove the logarithm, and solve this instead:</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( det_rootn(X) )
+</pre></div>
+</div>
+<p>The value of <tt class="docutils literal"><span class="pre">log_det(X)</span></tt> can simply be computed after the model is completed.
+Unfortunately, this only
+works if <tt class="docutils literal"><span class="pre">log_det</span></tt> is the only term in the objective; so, for instance, this
+function cannot, unfortunately, be converted in a similar fashion:</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( log_det(X) + trace(C*X) )
+</pre></div>
+</div>
+</li>
+<li><p class="first">Second, try different solvers. For instance, SeDuMi and MOSEK
+tend to be more effective with the successive approximation method
+than SDPT3. So if the default solver choice fails to give a
+solution to your model, try switching to one of these solvers.</p>
+</li>
+<li><p class="first">Third, try smaller instances of your problem. If they succeed where
+the larger instance fails, then at least you can confirm if the model
+is behaving as you hope before considering alternative options like
+a different solver.</p>
+</li>
+</ul>
+<p>The bottom line, unfortunately, is that we cannot guarantee that
+the successive approximation approach will successfully handle your
+specific models. If you encounter problems, you are invited to submit
+a bug report, but we will not be able to promise a fix.</p>
+<div class="section" id="suppressing-the-warning">
+<h3>Suppressing the warning<a class="headerlink" href="#suppressing-the-warning" title="Permalink to this headline">¶</a></h3>
+<p>Because of all of these caveats, we believe that it is necessary to
+issue a warning when it is used so that users understand its
+experimental nature. This warning appears the first time you
+attempt to specify a model in CVX that uses an function that
+requires the successive approximation method. In fact, that warning
+may very well have brought you to this section of the manual.</p>
+<p>If you wish to suppress this warning in the future, simply issue
+the command</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_expert true
+</pre></div>
+</div>
+<p>before you construct your model. If you wish to suppress this
+message for all future sessions of MATLAB, follow this command
+with the <tt class="docutils literal"><span class="pre">cvx_save_prefs</span></tt> command.</p>
+</div>
+</div>
+<div class="section" id="power-functions-and-p-norms">
+<span id="powerfunc"></span><h2>Power functions and p-norms<a class="headerlink" href="#power-functions-and-p-norms" title="Permalink to this headline">¶</a></h2>
+<p>In order to implement the convex or concave branches of the power
+function <span class="math">\(x^p\)</span> and <span class="math">\(p\)</span>-norms <span class="math">\(\|x\|_p\)</span> for general
+values of <span class="math">\(p\)</span>, CVX uses an enhanced version of the SDP/SOCP
+conversion method described by <a class="reference internal" href="credits.html#ag00">[AG00]</a>.
+This approach is exact&#8212;as long as the exponent <span class="math">\(p\)</span> is rational.
+To determine integral values <span class="math">\(p_n,p_d\)</span> such that
+<span class="math">\(p_n/p_d=p\)</span>, CVX uses Matlab&#8217;s <tt class="docutils literal"><span class="pre">rat</span></tt> function with its
+default tolerance of <span class="math">\(10^{-6}\)</span>. There is currently no way to
+change this tolerance. See the
+<a class="reference external" href="http://www.mathworks.com/help/techdoc/ref/rat.html">MATLAB documentation</a>
+for the <tt class="docutils literal"><span class="pre">rat</span></tt> function for more details.</p>
+<p>The complexity of the resulting model depends roughly on the size of the
+values <span class="math">\(p_n\)</span> and <span class="math">\(p_d\)</span>. Let us introduce a more precise
+measure of this complexity. For <span class="math">\(p=2\)</span>, a constraint
+<span class="math">\(x^p\leq y\)</span> can be represented with exactly one <span class="math">\(2\times 2\)</span>
+LMI:</p>
+<div class="math">
+\[\begin{split}x^2 \leq y \quad\Longleftrightarrow\quad \begin{bmatrix} y &amp; x \\ x &amp; 1 \end{bmatrix} \succeq 0.\end{split}\]</div>
+<p>For other values of <span class="math">\(p=p_n/p_d\)</span>, CVX generates a number of
+<span class="math">\(2\times 2\)</span> LMIs that depends on both <span class="math">\(p_n\)</span> and <span class="math">\(p_d\)</span>;
+we denote this number by <span class="math">\(k(p_n,p_d)\)</span>. (In some cases additional
+linear constraints are also generated, but we ignore them for this
+analysis.) For instance, for <span class="math">\(p=3/1\)</span>, we have</p>
+<div class="math">
+\[\begin{split}x^3\leq y, x\geq 0 \quad\Longleftrightarrow\quad \exists z ~
+    \begin{bmatrix} z &amp; x \\ x &amp; 1 \end{bmatrix} \succeq 0. ~
+    \begin{bmatrix} y &amp; z \\ z &amp; x \end{bmatrix} \succeq 0.\end{split}\]</div>
+<p>So <span class="math">\(k(3,1)=2\)</span>. An empirical study has shown that for
+<span class="math">\(p=p_n/p_d&gt;1\)</span>, we have</p>
+<div class="math">
+\[k(p_n,p_d)\leq\log_2 p_n+\alpha(p_n)\]</div>
+<p>where the <span class="math">\(\alpha(p_n)\)</span> term grows very slowly compared to the
+<span class="math">\(\log_2\)</span> term. Indeed, for <span class="math">\(p_n\leq 4096\)</span>, we have verified
+that <span class="math">\(\alpha(p_n)\)</span> is usually 1 or 2, but occasionally 0 or 3.
+Similar results are obtained for <span class="math">\(0 &lt; p &lt; 1\)</span> and <span class="math">\(p &lt; 0\)</span>.</p>
+<p>The cost of this SDP representation is relatively small for nearly all
+useful values of <span class="math">\(p\)</span>. Nevertheless, CVX issues a warning
+whenever <span class="math">\(k(p_n,p_d)&gt;10\)</span> to insure that the user is not surprised
+by any unexpected slowdown. In the event that this threshold does not
+suit you, you may change it using the command
+<tt class="samp docutils literal"><span class="pre">cvx_power_warning(</span><em><span class="pre">thresh</span></em><span class="pre">)</span></tt>, where <tt class="samp docutils literal"><em><span class="pre">thresh</span></em></tt> is the desired
+cutoff value. Setting the threshold to <tt class="docutils literal"><span class="pre">Inf</span></tt> disables it completely.
+As with the command <tt class="docutils literal"><span class="pre">cvx_precision</span></tt>, you can place a call to
+<tt class="docutils literal"><span class="pre">cvx_power_warning</span></tt> within a model to change the threshold for a
+single model; or outside of a model to make a global change. The command
+always returns the <em>previous</em> value of the threshold, so you can save it
+and restore it upon completion of your model, if you wish. You can query
+the current value by calling <tt class="docutils literal"><span class="pre">cvx_power_warning</span></tt> with no arguments.</p>
+</div>
+<div class="section" id="overdetermined-problems">
+<span id="overdetermined"></span><h2>Overdetermined problems<a class="headerlink" href="#overdetermined-problems" title="Permalink to this headline">¶</a></h2>
+<p>The status message <tt class="docutils literal"><span class="pre">Overdetermined</span></tt> commonly occurs when structure
+in a variable or set is not properly recognized. For example, consider
+the problem of finding the smallest diagonal addition to a matrix
+<span class="math">\(W\in\mathbf{R}^{n\times n}\)</span> to make it positive semidefinite:</p>
+<div class="math">
+\[\begin{split}\begin{array}{ll}
+    \text{minimize}   &amp; \operatorname*{\textrm{Tr}}(D) \\
+    \text{subject to} &amp; W + D \succeq 0 \\
+                      &amp; D ~ \text{diagonal}
+\end{array}\end{split}\]</div>
+<p>In CVX, this problem might be expressed as follows:</p>
+<div class="highlight-none"><div class="highlight"><pre>n = size(W,1);
+cvx_begin
+    variable D(n,n) diagonal;
+    minimize( trace( D ) );
+    subject to
+        W + D == semidefinite(n);
+cvx_end
+</pre></div>
+</div>
+<p>If we apply this specification to the matrix <tt class="docutils literal"><span class="pre">W=randn(5,5)</span></tt>, a warning
+is issued,</p>
+<div class="highlight-none"><div class="highlight"><pre>Warning: Overdetermined equality constraints;
+    problem is likely infeasible.
+</pre></div>
+</div>
+<p>and the variable <tt class="docutils literal"><span class="pre">cvx_status</span></tt> is set to <tt class="docutils literal"><span class="pre">Overdetermined</span></tt>.</p>
+<p>What has happened here is that the unnamed variable returned by
+statement <tt class="docutils literal"><span class="pre">semidefinite(n)</span></tt> is <em>symmetric</em>, but <span class="math">\(W\)</span> is fixed and
+<em>unsymmetric</em>. Thus the problem, as stated, is infeasible. But there are
+also <span class="math">\(n^2\)</span> equality constraints here, and only <span class="math">\(n+n*(n+1)/2\)</span>
+unique degrees of freedom&#8212;thus the problem is overdetermined. We can
+correct this problem by replacing the equality constraint with</p>
+<div class="highlight-none"><div class="highlight"><pre>sym( W ) + D == semidefinite(n);
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">sym</span></tt> is a function we have provided that extracts the symmetric part
+of its argument; that is, <tt class="docutils literal"><span class="pre">sym(W)</span></tt> equals <tt class="docutils literal"><span class="pre">0.5</span> <span class="pre">*</span> <span class="pre">(</span> <span class="pre">W</span> <span class="pre">+</span> <span class="pre">W'</span> <span class="pre">)</span></tt>.</p>
+</div>
+<div class="section" id="adding-new-functions-to-the-atom-library">
+<span id="newfunc"></span><h2>Adding new functions to the atom library<a class="headerlink" href="#adding-new-functions-to-the-atom-library" title="Permalink to this headline">¶</a></h2>
+<p>CVX allows new convex and concave functions to be defined and added
+to the atom library, in two ways, described in this section. The first
+method is simple, and can (and should) be used by many users of CVX,
+since it requires only a knowledge of the basic DCP ruleset. The second
+method is very powerful, but a bit complicated, and should be considered
+an advanced technique, to be attempted only by those who are truly
+comfortable with convex analysis, disciplined convex programming, and
+CVX in its current state.</p>
+<p>Please let us know if you have implemented a convex or concave
+function that you think would be useful to other users; we will be happy
+to incorporate it in a future release.</p>
+<div class="section" id="new-functions-via-the-dcp-ruleset">
+<h3>New functions via the DCP ruleset<a class="headerlink" href="#new-functions-via-the-dcp-ruleset" title="Permalink to this headline">¶</a></h3>
+<p>The simplest way to construct a new function that works within CVX
+is to construct it using expressions that fully conform to the DCP
+ruleset. Consider, for instance, the deadzone function</p>
+<div class="math">
+\[\begin{split}f(x) = \max \{ |x|-1, 0 \} = \begin{cases} 0 &amp; |x| \leq 1\\ x-1 &amp; x &gt; 1 \end{cases}\end{split}\]</div>
+<p>To implement this function in CVX, simply create a file
+<tt class="docutils literal"><span class="pre">deadzone.m</span></tt> containing</p>
+<div class="highlight-none"><div class="highlight"><pre>function y = deadzone( x )
+y = max( abs( x ) - 1, 0 )
+</pre></div>
+</div>
+<p>This function works just as you expect it would outside of
+CVX &#8212; that is, when its argument is numerical. But thanks to Matlab&#8217;s
+operator overloading capability, it will also work within CVX if
+called with an affine argument. CVX will properly conclude that the
+function is convex, because all of the operations carried out conform to
+the rules of DCP: <tt class="docutils literal"><span class="pre">abs</span></tt> is recognized as a convex function; we can
+subtract a constant from it, and we can take the maximum of the result
+and <tt class="docutils literal"><span class="pre">0</span></tt>, which yields a convex function. So we are free to use
+<tt class="docutils literal"><span class="pre">deadzone</span></tt> anywhere in a CVX specification that we might use
+<tt class="docutils literal"><span class="pre">abs</span></tt>, for example, because CVX knows that it is a convex
+function.</p>
+<p>Let us emphasize that when defining a function this way, the expressions
+you use <em>must</em> conform to the DCP ruleset, just as they would if they
+had been inserted directly into a CVX model. For example, if we
+replace <tt class="docutils literal"><span class="pre">max</span></tt> with <tt class="docutils literal"><span class="pre">min</span></tt> above; <em>e.g.</em>,</p>
+<div class="highlight-none"><div class="highlight"><pre>function y = deadzone_bad( x )
+y = min( abs( x ) - 1, 0 )
+</pre></div>
+</div>
+<p>then the modified function fails to satisfy the DCP ruleset. The function
+will work <em>outside</em> of a CVX specification, happily computing the
+value <span class="math">\(\min \{|x|-1,0\}\)</span> for a <em>numerical</em> argument <span class="math">\(x\)</span>. But
+inside a CVX specification, invoked with a nonconstant argument, it
+will generate an error.</p>
+</div>
+<div class="section" id="new-functions-via-partially-specified-problems">
+<span id="newfunc-psp"></span><h3>New functions via partially specified problems<a class="headerlink" href="#new-functions-via-partially-specified-problems" title="Permalink to this headline">¶</a></h3>
+<p>A more advanced method for defining new functions in CVX relies on
+the following basic result of convex analysis. Suppose that
+<span class="math">\(S\subset\mathbf{R}^n\times\mathbf{R}^m\)</span> is a convex set and
+<span class="math">\(g:(\mathbf{R}^n\times\mathbf{R}^m)\rightarrow(\mathbf{R}\cup+\infty)\)</span>
+is a convex function. Then</p>
+<div class="math">
+\[f:\mathbf{R}^n\rightarrow(\mathbf{R}\cup+\infty), \quad f(x) \triangleq \inf\left\{\,g(x,y)\,~|~\,\exists y,~(x,y)\in S \,\right\}\]</div>
+<p>is also a convex function. (This rule is sometimes called the <em>partial
+minimization rule</em>.) We can think of the convex function <span class="math">\(f\)</span> as
+the optimal value of a family of convex optimization problems, indexed
+or parametrized by <span class="math">\(x\)</span>,</p>
+<div class="math">
+\[\begin{split}\begin{array}{ll}
+    \mbox{minimize} &amp; g(x,y) \\
+    \mbox{subject to} &amp; (x,y) \in S
+\end{array}\end{split}\]</div>
+<p>with optimization variable <span class="math">\(y\)</span>.</p>
+<p>One special case should be very familiar: if <span class="math">\(m=1\)</span> and
+<span class="math">\(g(x,y)\triangleq y\)</span>, then</p>
+<div class="math">
+\[f(x) \triangleq \inf\left\{\,y\,~|~\,\exists y,~(x,y)\in S\,\right\}\]</div>
+<p>gives the classic <em>epigraph</em> representation of <span class="math">\(f\)</span>:</p>
+<div class="math">
+\[\operatorname{\textbf{epi}}f = S+ \left( \{ 0 \} \times \mathbf{R}_+ \right),\]</div>
+<p>where <span class="math">\(0 \in \mathbf{R}^n\)</span>.</p>
+<p>In CVX you can define a convex function in this very manner, that
+is, as the optimal value of a parameterized family of disciplined convex
+programs. We call the underlying convex program in such cases an
+<em>incomplete specification</em>&#8212;so named because the parameters (that is,
+the function inputs) are unknown when the specification is constructed.
+The concept of incomplete specifications can at first seem a bit
+complicated, but it is very powerful mechanism that allows CVX to
+support a wide variety of functions.</p>
+<p>Let us look at an example to see how this works. Consider the
+unit-halfwidth Huber penalty function <span class="math">\(h(x)\)</span>:</p>
+<div class="math">
+\[\begin{split}h:\mathbf{R}\rightarrow\mathbf{R}, \quad h(x) \triangleq \begin{cases} x^2 &amp; |x| \leq 1 \\ 2|x|-1 &amp; |x| \geq 1 \end{cases}.\end{split}\]</div>
+<p>We can express the Huber function in terms of the following family of
+convex QPs, parameterized by <span class="math">\(x\)</span>:</p>
+<div class="math">
+\[\begin{split}\begin{array}{ll}
+    \text{minimize}   &amp; 2 v + w^2 \\
+    \text{subject to} &amp; | x | \leq v + w \\
+                      &amp; w \leq 1, ~ v \geq 0
+\end{array}\end{split}\]</div>
+<p>with scalar variables <span class="math">\(v\)</span> and <span class="math">\(w\)</span>. The optimal value of this
+simple QP is equal to the Huber penalty function of <span class="math">\(x\)</span>. We note
+that the objective and constraint functions in this QP are (jointly)
+convex in <span class="math">\(v\)</span>, <span class="math">\(w\)</span> <em>and</em> <span class="math">\(x\)</span>.</p>
+<p>We can implement the Huber penalty function in CVX as follows:</p>
+<div class="highlight-none"><div class="highlight"><pre>function cvx_optval = huber( x )
+cvx_begin
+    variables w v;
+    minimize( w^2 + 2 * v );
+    subject to
+        abs( x ) &lt;= w + v;
+        w &lt;= 1; v &gt;= 0;
+cvx_end
+</pre></div>
+</div>
+<p>If <tt class="docutils literal"><span class="pre">huber</span></tt> is called with a numeric value of <tt class="docutils literal"><span class="pre">x</span></tt>, then upon reaching
+the <tt class="docutils literal"><span class="pre">cvx_end</span></tt> statement, CVX will find a complete specification,
+and solve the problem to compute the result. CVX places the optimal
+objective function value into the variable <tt class="docutils literal"><span class="pre">cvx_optval</span></tt>, and function
+returns that value as its output. Of course, it&#8217;s very inefficient to
+compute the Huber function of a numeric value <span class="math">\(x\)</span> by solving a QP.
+But it does give the correct value (up to the core solver accuracy).</p>
+<p>What is most important, however, is that if <tt class="docutils literal"><span class="pre">huber</span></tt> is used within a
+CVX specification, with an affine CVX expression for its
+argument, then CVX will do the right thing. In particular, CVX
+will recognize the Huber function, called with affine argument, as a
+valid convex expression. In this case, the function <tt class="docutils literal"><span class="pre">huber</span></tt> will
+contain a special Matlab object that represents the function call in
+constraints and objectives. Thus the function <tt class="docutils literal"><span class="pre">huber</span></tt> can be used
+anywhere a traditional convex function can be used, in constraints or
+objective functions, in accordance with the DCP ruleset.</p>
+<p>There is a corresponding development for concave functions as well.
+Given a convex set <span class="math">\(S\)</span> as above, and a concave function
+<span class="math">\(g:(\mathbf{R}^n\times\mathbf{R}^m)\rightarrow(\mathbf{R}\cup-\infty)\)</span>,
+the function</p>
+<div class="math">
+\[f:\mathbf{R}\rightarrow(\mathbf{R}\cup-\infty), \quad f(x) \triangleq \sup\left\{\,g(x,y)\,~|~\,\exists y,~(x,y)\in S \,\right\}\]</div>
+<p>is concave. If <span class="math">\(g(x,y)\triangleq y\)</span>, then</p>
+<div class="math">
+\[f(x) \triangleq \sup\left\{\,y\,~|~\,\exists y,~(x,y)\in S\,\right\}\]</div>
+<p>gives the <em>hypograph</em> representation of <span class="math">\(f\)</span>:</p>
+<div class="math">
+\[\operatorname{\textbf{hypo}}f = S - \mathbf{R}_+^n.\]</div>
+<p>In CVX, a concave incomplete specification is simply one that uses a
+<tt class="docutils literal"><span class="pre">maximize</span></tt> objective instead of a <tt class="docutils literal"><span class="pre">minimize</span></tt> objective; and if
+properly constructed, it can be used anywhere a traditional concave
+function can be used within a CVX specification.</p>
+<p>For an example of a concave incomplete specification, consider the
+function</p>
+<div class="math">
+\[f:\mathbf{R}^{n\times n}\rightarrow\mathbf{R}, \quad f(X) = \lambda_{\min}(X+X^T)\]</div>
+<p>Its hypograph can be represented using a single linear matrix
+inequality:</p>
+<div class="math">
+\[\operatorname{\textbf{hypo}}f = \left\{\, (X,t) \,~|~\, f(X) \geq t \,\right\} = \left\{\, (X,t) \,~|~\, X + X^T - t I \succeq 0 \,\right\}\]</div>
+<p>So we can implement this function in CVX as follows:</p>
+<div class="highlight-none"><div class="highlight"><pre>function cvx_optval = lambda_min_symm( X )
+n = size( X, 1 );
+cvx_begin
+    variable y;
+    maximize( y );
+    subject to
+        X + X&#39; - y * eye( n ) == semidefinite( n );
+cvx_end
+</pre></div>
+</div>
+<p>If a numeric value of <tt class="docutils literal"><span class="pre">X</span></tt> is supplied, this function will return
+<tt class="docutils literal"><span class="pre">min(eig(X+X'))</span></tt> (to within numerical tolerances). However, this
+function can also be used in CVX constraints and objectives, just
+like any other concave function in the atom library.</p>
+<p>There are two practical issues that arise when defining functions using
+incomplete specifications, both of which we will illustrate using our
+<tt class="docutils literal"><span class="pre">huber</span></tt> example above. First of all, as written the function works
+only with scalar values. To apply it (elementwise) to a vector requires
+that we iterate through the elements in a <tt class="docutils literal"><span class="pre">for</span></tt> loop&#8212;a <em>very</em>
+inefficient enterprise, particularly in CVX. A far better approach
+is to extend the <tt class="docutils literal"><span class="pre">huber</span></tt> function to handle vector inputs. This is, in
+fact, rather simple to do: we simply create a <em>multiobjective</em> version
+of the problem:</p>
+<div class="highlight-none"><div class="highlight"><pre>function cvx_optval = huber( x )
+sx = size( x );
+cvx_begin
+    variables w( sx ) v( sx );
+    minimize( w .^ 2 + 2 * v );
+    subject to
+        abs( x ) &lt;= w + v;
+        w &lt;= 1; v &gt;= 0;
+cvx_end
+</pre></div>
+</div>
+<p>This version of <tt class="docutils literal"><span class="pre">huber</span></tt> will in effect create <tt class="docutils literal"><span class="pre">sx</span></tt> &#8220;instances&#8221; of
+the problem in parallel; and when used in a CVX specification, will
+be handled correctly.</p>
+<p>The second issue is that if the input to <tt class="docutils literal"><span class="pre">huber</span></tt> is numeric, then
+direct computation is a far more efficient way to compute the result
+than solving a QP. (What is more, the multiobjective version cannot be
+used with numeric inputs.) One solution is to place both versions in one
+file, with an appropriate test to select the proper version to use:</p>
+<div class="highlight-none"><div class="highlight"><pre>function cvx_optval = huber( x )
+if isnumeric( x ),
+    xa   = abs( x );
+    flag = xa &lt; 1;
+    cvx_optval = flag .* xa.^2 + (~flag) * (2*xa-1);
+else,
+    sx = size( x );
+    cvx_begin
+        variables w( sx ) v( sx );
+        minimize( w .^ 2 + 2 * v );
+        subject to
+            abs( x ) &lt;= w + v;
+            w &lt;= 1; v &gt;= 0;
+    cvx_end
+end
+</pre></div>
+</div>
+<p>Alternatively, you can create two separate versions of the function, one
+for numeric input and one for CVX expressions, and place the CVX
+version in a subdirectory called <tt class="docutils literal"><span class="pre">&#64;cvx</span></tt>. (Do not include this
+directory in your Matlab <tt class="docutils literal"><span class="pre">path</span></tt>; only include its parent.) Matlab will
+automatically call the version in the <tt class="docutils literal"><span class="pre">&#64;cvx</span></tt> directory when one of the
+arguments is a CVX variable. This is the approach taken for the
+version of <tt class="docutils literal"><span class="pre">huber</span></tt> found in the CVX atom library.</p>
+<p>One good way to learn more about using incomplete specifications is to
+examine some of the examples already in the CVX atom library. Good
+choices include <tt class="docutils literal"><span class="pre">huber</span></tt>, <tt class="docutils literal"><span class="pre">inv_pos</span></tt>, <tt class="docutils literal"><span class="pre">lambda_min</span></tt>, <tt class="docutils literal"><span class="pre">lambda_max</span></tt>,
+<tt class="docutils literal"><span class="pre">matrix_frac</span></tt>, <tt class="docutils literal"><span class="pre">quad_over_lin</span></tt>, <tt class="docutils literal"><span class="pre">sum_largest</span></tt>, and others. Some
+are a bit difficult to read because of diagnostic or error-checking
+code, but these are relatively simple.</p>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[3]</a></td><td>Indeed, a future version of CVX will support the use of the
+Matlab function <tt class="docutils literal"><span class="pre">spdiags</span></tt>, which will reduce the entire for loop to
+the single constraint <tt class="docutils literal"><span class="pre">spdiags(X,0:n-1)==b</span></tt>.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="index.html">
+          <img class="logo" src="_static/cvxrlogo.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Advanced topics</a><ul>
+<li><a class="reference internal" href="#eliminating-quadratic-forms">Eliminating quadratic forms</a></li>
+<li><a class="reference internal" href="#indexed-dual-variables">Indexed dual variables</a></li>
+<li><a class="reference internal" href="#the-successive-approximation-method">The successive approximation method</a><ul>
+<li><a class="reference internal" href="#suppressing-the-warning">Suppressing the warning</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#power-functions-and-p-norms">Power functions and p-norms</a></li>
+<li><a class="reference internal" href="#overdetermined-problems">Overdetermined problems</a></li>
+<li><a class="reference internal" href="#adding-new-functions-to-the-atom-library">Adding new functions to the atom library</a><ul>
+<li><a class="reference internal" href="#new-functions-via-the-dcp-ruleset">New functions via the DCP ruleset</a></li>
+<li><a class="reference internal" href="#new-functions-via-partially-specified-problems">New functions via partially specified problems</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="support.html"
+                        title="previous chapter">Support</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="license.html"
+                        title="next chapter">License</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/advanced.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul><h3>Other links</h3>
+<ul class="this-page-menu">
+<li><a href="CVX.pdf" target="_blank">Download the PDF</a></li>
+<li><a href="http://cvxr.com/cvx">CVX home page</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="license.html" title="License"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="support.html" title="Support"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright © 2012, CVX Research, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

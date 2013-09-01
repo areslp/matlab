@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Figure 8.16: Quadratic placement problem</title>
+<link rel="canonical" href="http://cvxr.com/cvx/examples/cvxbook/Ch08_geometric_probs/html/placement_quad.html">
+<link rel="stylesheet" href="../../../examples.css" type="text/css">
+</head>
+<body>
+<div id="header">
+<h1>Figure 8.16: Quadratic placement problem</h1>
+Jump to:&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#source">Source code</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#output">Text output</a>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#plots">Plots</a>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="../../../index.html">Library index</a>
+</div>
+<div id="content">
+<a id="source"></a>
+<pre class="codeinput">
+<span class="comment">% Section 8.7.3, Boyd &amp; Vandenberghe "Convex Optimization"</span>
+<span class="comment">% Original by Lieven Vandenberghe</span>
+<span class="comment">% Adapted for CVX by Joelle Skaf - 10/24/05</span>
+<span class="comment">% (a figure is generated)</span>
+<span class="comment">%</span>
+<span class="comment">% Placement problem with 6 free points, 8 fixed points and 27 links.</span>
+<span class="comment">% The coordinates of the free points minimize the sum of the squares of</span>
+<span class="comment">% Euclidean lengths of the links, i.e.</span>
+<span class="comment">%           minimize    sum_{i&lt;j) h(||x_i - x_j||)</span>
+<span class="comment">% where h(z) = z^2.</span>
+
+linewidth = 1;      <span class="comment">% in points;  width of dotted lines</span>
+markersize = 5;    <span class="comment">% in points;  marker size</span>
+
+<span class="comment">% Input data</span>
+fixed = [ 1   1  -1 -1    1   -1  -0.2  0.1; <span class="comment">% coordinates of fixed points</span>
+          1  -1  -1  1 -0.5 -0.2    -1    1]';
+M = size(fixed,1);  <span class="comment">% number of fixed points</span>
+N = 6;              <span class="comment">% number of free points</span>
+
+<span class="comment">% first N columns of A correspond to free points,</span>
+<span class="comment">% last M columns correspond to fixed points</span>
+
+A = [ 1  0  0 -1  0  0    0  0  0  0  0  0  0  0
+      1  0 -1  0  0  0    0  0  0  0  0  0  0  0
+      1  0  0  0 -1  0    0  0  0  0  0  0  0  0
+      1  0  0  0  0  0   -1  0  0  0  0  0  0  0
+      1  0  0  0  0  0    0 -1  0  0  0  0  0  0
+      1  0  0  0  0  0    0  0  0  0 -1  0  0  0
+      1  0  0  0  0  0    0  0  0  0  0  0  0 -1
+      0  1 -1  0  0  0    0  0  0  0  0  0  0  0
+      0  1  0 -1  0  0    0  0  0  0  0  0  0  0
+      0  1  0  0  0 -1    0  0  0  0  0  0  0  0
+      0  1  0  0  0  0    0 -1  0  0  0  0  0  0
+      0  1  0  0  0  0    0  0 -1  0  0  0  0  0
+      0  1  0  0  0  0    0  0  0  0  0  0 -1  0
+      0  0  1 -1  0  0    0  0  0  0  0  0  0  0
+      0  0  1  0  0  0    0 -1  0  0  0  0  0  0
+      0  0  1  0  0  0    0  0  0  0 -1  0  0  0
+      0  0  0  1 -1  0    0  0  0  0  0  0  0  0
+      0  0  0  1  0  0    0  0 -1  0  0  0  0  0
+      0  0  0  1  0  0    0  0  0 -1  0  0  0  0
+      0  0  0  1  0  0    0  0  0  0  0 -1  0  0
+      0  0  0  1  0 -1    0  0  0  0  0 -1  0  0        <span class="comment">% error in data!!!</span>
+      0  0  0  0  1 -1    0  0  0  0  0  0  0  0
+      0  0  0  0  1  0   -1  0  0  0  0  0  0  0
+      0  0  0  0  1  0    0  0  0 -1  0  0  0  0
+      0  0  0  0  1  0    0  0  0  0  0  0  0 -1
+      0  0  0  0  0  1    0  0 -1  0  0  0  0  0
+      0  0  0  0  0  1    0  0  0  0 -1  0  0  0 ];
+nolinks = size(A,1);    <span class="comment">% number of links</span>
+
+fprintf(1,<span class="string">'Computing the optimal locations of the 6 free points...'</span>);
+
+cvx_begin
+    variable <span class="string">x(N+M,2)</span>
+    minimize ( sum(square_pos(norms( A*x,2,2 ))))
+    x(N+[1:M],:) == fixed;
+cvx_end
+
+fprintf(1,<span class="string">'Done! \n'</span>);
+
+<span class="comment">% Plots</span>
+free_sum = x(1:N,:);
+figure(1);
+dots = plot(free_sum(:,1), free_sum(:,2), <span class="string">'or'</span>, fixed(:,1), fixed(:,2), <span class="string">'bs'</span>);
+set(dots(1),<span class="string">'MarkerFaceColor'</span>,<span class="string">'red'</span>);
+hold <span class="string">on</span>
+legend(<span class="string">'Free points'</span>,<span class="string">'Fixed points'</span>,<span class="string">'Location'</span>,<span class="string">'Best'</span>);
+<span class="keyword">for</span> i=1:nolinks
+  ind = find(A(i,:));
+  line2 = plot(x(ind,1), x(ind,2), <span class="string">':k'</span>);
+  hold <span class="string">on</span>
+  set(line2,<span class="string">'LineWidth'</span>,linewidth);
+<span class="keyword">end</span>
+axis([-1.1 1.1 -1.1 1.1]) ;
+axis <span class="string">equal</span>;
+title(<span class="string">'Quadratic placement problem'</span>);
+<span class="comment">% print -deps placement-quadr.eps</span>
+
+figure(2)
+all = [free_sum; fixed];
+bins = 0.05:0.1:1.95;
+lengths = sqrt(sum((A*all).^2')');
+[N2,hist2] = hist(lengths,bins);
+bar(hist2,N2);
+hold <span class="string">on</span>;
+xx = linspace(0,2,1000); yy = (4/1.5^2)*xx.^2;
+plot(xx,yy,<span class="string">'--'</span>);
+axis([0 1.5 0 4.5]);
+hold <span class="string">on</span>
+plot([0 2], [0 0 ], <span class="string">'k-'</span>);
+title(<span class="string">'Distribution of the 27 link lengths'</span>);
+<span class="comment">% print -deps placement-quadr-hist.eps</span>
+</pre>
+<a id="output"></a>
+<pre class="codeoutput">
+Computing the optimal locations of the 6 free points... 
+Calling SDPT3: 216 variables, 120 equality constraints
+   For improved efficiency, SDPT3 is solving the dual problem.
+------------------------------------------------------------
+
+ num. of constraints = 120
+ dim. of sdp    var  = 54,   num. of sdp  blk  = 27
+ dim. of socp   var  = 81,   num. of socp blk  = 27
+ dim. of linear var  = 54
+*******************************************************************
+   SDPT3: Infeasible path-following algorithms
+*******************************************************************
+ version  predcorr  gam  expon  scale_data
+   HKM      1      0.000   1        0    
+it pstep dstep pinfeas dinfeas  gap      prim-obj      dual-obj    cputime
+-------------------------------------------------------------------
+ 0|0.000|0.000|1.6e+01|1.2e+01|1.4e+04| 2.700000e+02  0.000000e+00| 0:0:00| chol  1  1 
+ 1|0.813|0.818|2.9e+00|2.2e+00|3.4e+03| 2.733869e+02 -2.561504e+02| 0:0:00| chol  1  1 
+ 2|1.000|1.000|2.7e-06|1.0e-02|5.2e+02| 2.225971e+02 -2.937806e+02| 0:0:00| chol  1  1 
+ 3|1.000|1.000|1.8e-06|1.0e-03|1.5e+02| 4.292175e+01 -1.101842e+02| 0:0:00| chol  1  1 
+ 4|0.924|0.920|4.1e-07|1.7e-04|2.3e+01|-1.362729e+01 -3.664151e+01| 0:0:00| chol  1  1 
+ 5|1.000|1.000|1.0e-08|1.0e-05|7.8e+00|-1.787508e+01 -2.562965e+01| 0:0:00| chol  1  1 
+ 6|0.933|0.934|4.1e-09|1.6e-06|6.6e-01|-2.034619e+01 -2.100934e+01| 0:0:00| chol  1  1 
+ 7|0.996|0.995|1.5e-09|1.1e-07|2.1e-02|-2.054125e+01 -2.056189e+01| 0:0:00| chol  1  1 
+ 8|0.989|0.989|4.5e-10|1.1e-08|2.3e-04|-2.054724e+01 -2.054748e+01| 0:0:00| chol  1  1 
+ 9|0.989|0.989|9.0e-12|2.2e-10|2.6e-06|-2.054731e+01 -2.054732e+01| 0:0:00| chol  1  1 
+10|0.997|0.996|4.7e-13|2.6e-12|3.4e-08|-2.054731e+01 -2.054731e+01| 0:0:00|
+  stop: max(relative gap, infeasibilities) &lt; 1.49e-08
+-------------------------------------------------------------------
+ number of iterations   = 10
+ primal objective value = -2.05473136e+01
+ dual   objective value = -2.05473136e+01
+ gap := trace(XZ)       = 3.37e-08
+ relative gap           = 8.02e-10
+ actual relative gap    = 7.92e-10
+ rel. primal infeas     = 4.74e-13
+ rel. dual   infeas     = 2.63e-12
+ norm(X), norm(y), norm(Z) = 2.0e+01, 6.7e+00, 1.1e+01
+ norm(A), norm(b), norm(C) = 1.8e+01, 6.2e+00, 9.3e+00
+ Total CPU time (secs)  = 0.26  
+ CPU time per iteration = 0.03  
+ termination code       =  0
+ DIMACS: 1.5e-12  0.0e+00  8.2e-12  0.0e+00  7.9e-10  8.0e-10
+-------------------------------------------------------------------
+------------------------------------------------------------
+Status: Solved
+Optimal value (cvx_optval): +20.5473
+ 
+Done! 
+</pre>
+<a id="plots"></a>
+<div id="plotoutput">
+<img src="placement_quad__01.png" alt=""> <img src="placement_quad__02.png" alt=""> 
+</div>
+</div>
+</body>
+</html>

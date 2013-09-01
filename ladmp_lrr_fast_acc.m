@@ -27,6 +27,7 @@ global A Xg eta M;%A is the skinny SVD of Z_k, Xg is a copy of X, and M=X-E_{k+1
 
 % TODO: acc as LRR
 P=orth(X'); % nxr
+save P.mat P; % TODO: 
 r=size(P,2);
 % save P.mat P;
 A=X*P; % 3xr

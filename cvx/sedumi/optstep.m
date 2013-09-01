@@ -1,5 +1,8 @@
-%             [x,y] = optstep(A,b,c, y0,y,d,v,dxmdz, K,L,symLden,...
-%                        dense,Ablkjc,Aord,ADA,DAt, feasratio, R,pars)
+function [x,y] = optstep(A,b,c, y0,y,d,v,dxmdz, K,L,symLden,...
+    dense,Ablkjc,Aord,ADA,DAt, feasratio, R,pars)
+% [x,y] = optstep(A,b,c, y0,y,d,v,dxmdz, K,L,symLden,dense,Ablkjc,Aord,...
+%                 ADA,DAt, feasratio, R,pars)
+%
 % OPTSTEP Implements Mehrotra-Ye type optimality projection for
 %  IPM-LP solver.
 %
@@ -7,9 +10,6 @@
 %
 % See also sedumi
 
-function [x,y] = optstep(A,b,c, y0,y,d,v,dxmdz, K,L,symLden,...
-    dense,Ablkjc,Aord,ADA,DAt, feasratio, R,pars)
-%
 % This file is part of SeDuMi 1.1 by Imre Polik and Oleksandr Romanko
 % Copyright (C) 2005 McMaster University, Hamilton, CANADA  (since 1.1)
 %
@@ -61,9 +61,14 @@ if abs(abs(feasratio)-1) < 0.1
     % Compute ADA, with d[N] = 0. Hence A[B]*D[B]^2*A[B]'.
     % --------------------------------------------------
     DAt = getDAtm(A,Ablkjc,dense,DAt.denq,d,K);
-    ADA = getada1(ADA, A,Ablkjc(:,3),Aord.lqperm, d, K.qblkstart);
-    ADA = getada2(ADA, DAt,Aord, K);
-    [ADA,absd] = getada3(ADA, A,Ablkjc(:,3),Aord,invcholfac(d.u,K, d.perm),K);
+    if sum(K.s)==0
+        %ADA is global already
+        absd=getada(A,K,d,DAt);
+    else
+        ADA = getada1(ADA, A, Ablkjc(:,3), Aord.lqperm, d, K.qblkstart);
+        ADA = getada2(ADA, DAt, Aord, K);
+        [ADA,absd] = getada3(ADA, A, Ablkjc(:,3), Aord, invcholfac(d.u, K, d.perm), K);
+    end
     % ------------------------------------------------------------
     % Block Sparse Cholesky: ADA(L.perm,L.perm) = L.L*diag(L.d)*L.L'
     % ------------------------------------------------------------
@@ -77,13 +82,12 @@ if abs(abs(feasratio)-1) < 0.1
     % Solve ADAt*psi = -x0*b+A*D*v, dx = v-D*At*psi.  LEAST SQUARES.
     % ------------------------------------------------------------
     [psi,dx,err.kcg,err.b] = wrapPcg(L,Lden,A,dense,d, DAt,K,...
-        (-x0) * b,v, pars.cg,pars.eps / pars.cg.restol);
+        (-x0) * b,v, pars.cg,pars.eps / pars.cg.restol); %#ok
     x = sqrt(d.l) .* dx;
     % ----------------------------------------
     % CHECK WHETHER x[B] >= 0 AND WHETHER RESIDUAL DID NOT DETERIORATE.
     % ----------------------------------------
-    if (min(x) < 0.0) || ...
-            (norm(err.b,inf) > 5 * max(max(y0,1e-10 * x0) * R.maxb, y0 * R.maxRb))
+    if (min(x) < 0.0) || (norm(err.b,inf) > 2 * max(max(y0,1e-10 * x0) * R.maxb, y0 * R.maxRb))
         x = [];  % Incorrect guess of LP-basis
         return
     else

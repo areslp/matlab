@@ -1,0 +1,649 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Basics &mdash; CVX Users&#39; Guide</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0 (beta)',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="CVX Users&#39; Guide" href="index.html" />
+    <link rel="next" title="The DCP ruleset" href="dcp.html" />
+    <link rel="prev" title="A quick start" href="quickstart.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="dcp.html" title="The DCP ruleset"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="quickstart.html" title="A quick start"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-basics">
+<h1>The Basics<a class="headerlink" href="#the-basics" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="cvx-begin-and-cvx-end">
+<span id="begin-end"></span><h2><tt class="docutils literal"><span class="pre">cvx_begin</span></tt> and <tt class="docutils literal"><span class="pre">cvx_end</span></tt><a class="headerlink" href="#cvx-begin-and-cvx-end" title="Permalink to this headline">¶</a></h2>
+<p>All CVX models must be preceded by the command <tt class="docutils literal"><span class="pre">cvx_begin</span></tt> and
+terminated with the command <tt class="docutils literal"><span class="pre">cvx_end</span></tt>. All variable declarations,
+objective functions, and constraints should fall in between.
+The cvx_begin command may include one more more modifiers:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">cvx_begin</span> <span class="pre">quiet</span></tt></dt>
+<dd>Prevents the model from producing any screen output while it is being solved.</dd>
+<dt><tt class="docutils literal"><span class="pre">cvx_begin</span> <span class="pre">sdp</span></tt></dt>
+<dd>Invokes <a class="reference internal" href="sdp.html#sdp-mode"><em>semidefinite programming mode</em></a>.</dd>
+<dt><tt class="docutils literal"><span class="pre">cvx_begin</span> <span class="pre">gp</span></tt></dt>
+<dd>Invokes <a class="reference internal" href="gp.html#gp-mode"><em>geometric programming mode</em></a>.</dd>
+</dl>
+<p>These modifiers may be combined when appropriate; for instance, <tt class="docutils literal"><span class="pre">cvx_begin</span> <span class="pre">sdp</span> <span class="pre">quiet</span></tt>
+invokes SDP mode and silences the solver output.</p>
+</div>
+<div class="section" id="variables">
+<span id="id1"></span><h2>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h2>
+<p>All variables must be declared using the
+<tt class="docutils literal"><span class="pre">variable</span></tt> command (or <tt class="docutils literal"><span class="pre">variables</span></tt> command; see below)
+before they can be used in constraints or an objective function.
+A <tt class="docutils literal"><span class="pre">variable</span></tt> command includes the name of the variable, an optional
+dimension list, and one or more keywords that provide additional
+information about the content or structure of the variable.</p>
+<p>Variables can be real or complex scalars, vectors, matrices, or
+<span class="math">\(n\)</span>-dimensional arrays. For instance,</p>
+<div class="highlight-none"><div class="highlight"><pre>variable X
+variable Y(20,10)
+variable Z(5,5,5)
+</pre></div>
+</div>
+<p>declares a total of 326 (scalar) variables: a scalar <tt class="docutils literal"><span class="pre">X</span></tt>, a 20x10 matrix <tt class="docutils literal"><span class="pre">Y</span></tt> (containing 200 scalar variables),
+and a 5x5x5 array <tt class="docutils literal"><span class="pre">Z</span></tt> (containing 125 scalar variables).</p>
+<p>Variable declarations can also include one or more <em>keywords</em> to denote various
+structures or conditions on the variable. For instance, to declare a complex
+variable, use the <tt class="docutils literal"><span class="pre">complex</span></tt> keyword:</p>
+<div class="highlight-none"><div class="highlight"><pre>variable w(50) complex
+</pre></div>
+</div>
+<p>Nonnegative variables and symmetric/Hermitian positive semidefinite (PSD) matrices can
+be specified with the <tt class="docutils literal"><span class="pre">nonnegative</span></tt> and <tt class="docutils literal"><span class="pre">semidefinite</span></tt> keywords, respectively:</p>
+<div class="highlight-none"><div class="highlight"><pre>variable x(10) nonnegative
+variable Z(5,5) semidefinite
+variable Q(5,5) complex semidefinite
+</pre></div>
+</div>
+<p>In this example, <tt class="docutils literal"><span class="pre">x</span></tt> is a nonnegative vector, and <tt class="docutils literal"><span class="pre">Z</span></tt> is a real symmetric PSD matrix
+and <tt class="docutils literal"><span class="pre">Q``is</span> <span class="pre">a</span> <span class="pre">complex</span> <span class="pre">Hermitian</span> <span class="pre">PSD</span> <span class="pre">matrix.</span> <span class="pre">As</span> <span class="pre">we</span> <span class="pre">will</span> <span class="pre">see</span> <span class="pre">below,</span> <span class="pre">``hermitian</span> <span class="pre">semidefinite</span></tt>
+would be an equivalent choice for this third case.</p>
+<p>For MIDCPs, the <tt class="docutils literal"><span class="pre">integer</span></tt> and <tt class="docutils literal"><span class="pre">binary</span></tt> keywords are used to declare integer
+and binary variables, respectively:</p>
+<div class="highlight-none"><div class="highlight"><pre>variable p(10) integer
+variable q binary
+</pre></div>
+</div>
+<p>A variety of keywords are available to help construct variables with
+<em>matrix structure</em> such as symmetry or bandedness.
+For example, the code segment</p>
+<div class="highlight-none"><div class="highlight"><pre>variable Y(50,50) symmetric
+variable Z(100,100) hermitian toeplitz
+</pre></div>
+</div>
+<p>declares Y to be a real <span class="math">\(50 \times 50\)</span> symmetric matrix
+variable, and Z a <span class="math">\(100 \times 100\)</span> Hermitian
+Toeplitz matrix variable. (Note that the <tt class="docutils literal"><span class="pre">hermitian</span></tt> keyword also specifies
+that the matrix is complex.) The currently supported structure
+keywords are:</p>
+<div class="highlight-none"><div class="highlight"><pre>banded(lb,ub)      diagonal           hankel             hermitian
+skew_symmetric     symmetric          toeplitz           tridiagonal
+lower_bidiagonal   lower_hessenberg   lower_triangular
+upper_bidiagonal   upper_hankel       upper_hessenberg   upper_triangular
+</pre></div>
+</div>
+<p>The underscores can actually be omitted; so, for example, <tt class="docutils literal"><span class="pre">lower</span> <span class="pre">triangular</span></tt>
+is acceptable as well. These keywords are self-explanatory with a couple of exceptions:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">banded(lb,ub)</span></tt></dt>
+<dd>the matrix is banded with a lower bandwidth lb
+and an upper bandwidth ub. If both lb and ub are zero,
+then a diagonal matrix results. ub can be omitted, in which case
+it is set equal to lb. For example, <tt class="docutils literal"><span class="pre">banded(1,1)</span></tt> (or
+<tt class="docutils literal"><span class="pre">banded(1)</span></tt>) is a tridiagonal matrix.</dd>
+<dt><tt class="docutils literal"><span class="pre">upper_hankel</span></tt></dt>
+<dd>The matrix is Hankel (i.e., constant along
+antidiagonals), and zero below the central antidiagonal, i.e., for
+<span class="math">\(i+j&gt;n+1\)</span>.</dd>
+</dl>
+<p>When multiple keywords are supplied, the resulting matrix structure is
+determined by intersection. For example, <tt class="docutils literal"><span class="pre">symmetric</span> <span class="pre">tridiagonal</span></tt> is a
+valid combination. That said, CVX does reject combinations such as
+<tt class="docutils literal"><span class="pre">symmetric</span> <span class="pre">lower_triangular</span></tt> when a more reasonable alternative
+exists&#8212;<tt class="docutils literal"><span class="pre">diagonal</span></tt>, in this case. Furthermore, if the keywords fully
+conflict, such that emph{no} non-zero matrix that satisfies all keywords,
+an error will result.</p>
+<p>Matrix-specific keywords can be applied to
+<span class="math">\(n\)</span>-dimensional arrays as well: each 2-dimensional &#8220;slice&#8221; of the
+array is given the stated structure. So for instance, the declaration</p>
+<div class="highlight-none"><div class="highlight"><pre>variable R(10,10,8) hermitian semidefinite
+</pre></div>
+</div>
+<p>constructs 8 <span class="math">\(10\times 10\)</span> complex Hermitian PSD matrices, stored in the
+2-D slices of <tt class="docutils literal"><span class="pre">R</span></tt>.</p>
+<p>As flexible as the <tt class="docutils literal"><span class="pre">variable</span></tt> statement may be, it can only be used to declare
+a single variable, which can be inconvenient if you have a lot of variables to
+declare. For this reason, the <tt class="docutils literal"><span class="pre">variables</span></tt> statement is provided which
+allows you to declare multiple variables; i.e.,</p>
+<div class="highlight-none"><div class="highlight"><pre>variables x1 x2 x3 y1(10) y2(10,10,10);
+</pre></div>
+</div>
+<p>The one limitation of the <tt class="docutils literal"><span class="pre">variables</span></tt> command is that it cannot
+declare complex, integer, or structured variables.
+These must be declared one at a time, using the singular <tt class="docutils literal"><span class="pre">variable</span></tt>
+command.</p>
+</div>
+<div class="section" id="objective-functions">
+<span id="objectives"></span><h2>Objective functions<a class="headerlink" href="#objective-functions" title="Permalink to this headline">¶</a></h2>
+<p>Declaring an objective function requires the use of the <tt class="docutils literal"><span class="pre">minimize</span></tt> or
+<tt class="docutils literal"><span class="pre">maximize</span></tt> function, as appropriate. (For the benefit of our users whose
+English favors it, the synonyms <tt class="docutils literal"><span class="pre">minimise</span></tt> and <tt class="docutils literal"><span class="pre">maximise</span></tt> are
+provided as well.) The objective function in a call to minimize must
+be convex; the objective function in a call to maximize must be
+concave; for instance:</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( norm( x, 1 ) )
+maximize( geo_mean( x ) )
+</pre></div>
+</div>
+<p>At most one objective function may be declared in a
+CVX specification, and it must have a scalar value.</p>
+<p>If no objective function is specified, the problem is interpreted as a
+<em>feasibility problem</em>, which is the same as performing a minimization with
+the objective function set to zero. In this case, cvx_optval is
+either 0, if a feasible point is found, or +Inf, if the
+constraints are not feasible.</p>
+</div>
+<div class="section" id="constraints">
+<span id="id2"></span><h2>Constraints<a class="headerlink" href="#constraints" title="Permalink to this headline">¶</a></h2>
+<p>The following constraint types are supported in CVX:</p>
+<ul class="simple">
+<li>Equality <tt class="docutils literal"><span class="pre">==</span></tt> constraints, where both the left- and right-hand
+sides are affine expressions.</li>
+<li>Less-than <tt class="docutils literal"><span class="pre">&lt;=</span></tt> inequality constraints, where the left-hand
+expression is convex, and the right-hand expression is concave.</li>
+<li>Greater-than <tt class="docutils literal"><span class="pre">&gt;=</span></tt> constraints, where the left-hand expression is
+concave, and the right-hand expression is convex.</li>
+</ul>
+<p>The non-equality operator <tt class="docutils literal"><span class="pre">~=</span></tt> may <em>never</em> be
+used in a constraint; in any case, such constraints are rarely convex.
+The latest version of CVX now allows you to chain inequalities
+together; <em>e.g.</em>, <tt class="docutils literal"><span class="pre">l</span> <span class="pre">&lt;=</span> <span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">u</span></tt>.  (Previous versions did not allow chained
+inequalities.)</p>
+<p>Note the important distinction between the single equals <tt class="docutils literal"><span class="pre">=</span></tt>, which is an
+assignment, and the double equals <tt class="docutils literal"><span class="pre">==</span></tt>, which denotes equality; for more
+on this distinction, see <a class="reference internal" href="#assignment"><em>Assignment and expression holders</em></a> below.</p>
+<p>Strict inequalities <tt class="docutils literal"><span class="pre">&lt;</span></tt> and <tt class="docutils literal"><span class="pre">&gt;</span></tt> are accepted as well, but they are interpreted
+identically to their nonstrict counterparts. We strongly discourage their use, and
+a future version of CVX may remove them altogether. For the reasoning behind
+this, please see the fuller discussion in <a class="reference internal" href="dcp.html#strict"><em>Strict inequalities</em></a>.</p>
+<p>Inequality and equality constraints are applied in an elementwise fashion,
+matching the behavior of MATLAB itself. For instance, if <tt class="docutils literal"><span class="pre">A</span></tt> and <tt class="docutils literal"><span class="pre">B</span></tt> are
+<span class="math">\(m \times n\)</span> arrays, then <tt class="docutils literal"><span class="pre">A&lt;=B</span></tt> is
+interpreted as <span class="math">\(mn\)</span> (scalar) inequalities <tt class="docutils literal"><span class="pre">A(i,j)&lt;=B(i,j)</span></tt>. When one
+side or the other is a scalar, that value is replicated; for instance,
+<tt class="docutils literal"><span class="pre">A&gt;0</span></tt> is interpreted as <tt class="docutils literal"><span class="pre">A(i,j)&gt;=0</span></tt>.</p>
+<p>The elementwise treatment of inequalities is altered in
+<a class="reference internal" href="sdp.html#sdp-mode"><em>semidefinite programming mode</em></a>; see that section for more details.</p>
+<p>CVX also supports a <em>set membership</em> constraint; see <a class="reference internal" href="#sets"><em>Set membership</em></a> below.</p>
+</div>
+<div class="section" id="functions">
+<span id="id3"></span><h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<p>The base CVX function library includes a variety of convex,
+concave, and affine functions which accept CVX variables or
+expressions as arguments. Many are common Matlab functions such as
+sum, trace, diag, sqrt, max, and min,
+re-implemented as needed to support CVX; others are new functions
+not found in Matlab. A complete list of the functions in the base
+library can be found in <a class="reference internal" href="funcref.html#funcref"><em>Reference guide</em></a>. It is
+also possible to add your own new functions; see
+<a class="reference internal" href="advanced.html#newfunc"><em>Adding new functions to the atom library</em></a>.</p>
+<p>An example of a function in the base library is the quadratic-over-linear
+function <tt class="docutils literal"><span class="pre">quad_over_lin</span></tt>:</p>
+<div class="math">
+\[\begin{split}f:\mathbf{R}^{n}\times\mathbf{R} \rightarrow \mathbf{R}, \quad
+f(x,y) = \begin{cases} x^T x / y &amp; y &gt; 0 \\ +\infty &amp; y \leq 0 \end{cases}\end{split}\]</div>
+<p>(The function also accepts complex <span class="math">\(x\)</span>, but we&#8217;ll consider
+real <span class="math">\(x\)</span> to keep things simple.) The quadratic-over-linear
+function is convex in <span class="math">\(x\)</span> and <span class="math">\(y\)</span>, and so can be used as an
+objective, in an appropriate constraint, or in a more complicated
+expression. We can, for example, minimize the quadratic-over-linear
+function of <span class="math">\((Ax-b,c^Tx+d)\)</span> using</p>
+<div class="highlight-none"><div class="highlight"><pre>minimize( quad_over_lin( A * x - b, c&#39; * x + d ) );
+</pre></div>
+</div>
+<p>inside a CVX specification, assuming x is a vector optimization
+variable, A is a matrix, b and c are vectors, and d is a
+scalar. CVX recognizes this objective expression as a convex
+function, since it is the composition of a convex function (the
+quadratic-over-linear function) with an affine function.</p>
+<p>You can also use the function <tt class="docutils literal"><span class="pre">quad_over_lin</span></tt> <em>outside</em> a CVX
+specification. In this case, it just computes its (numerical) value,
+given (numerical) arguments. If <tt class="docutils literal"><span class="pre">c'*x+d</span></tt> is positive, then the
+result is numerically equivalent tp</p>
+<div class="highlight-none"><div class="highlight"><pre>( ( A * x - b )&#39; * ( A * x - b ) ) / ( c&#39; * x + d )
+</pre></div>
+</div>
+<p>However, the <tt class="docutils literal"><span class="pre">quad_over_lin</span></tt> function also
+performs a domain check, so it returns <tt class="docutils literal"><span class="pre">Inf</span></tt> if <tt class="docutils literal"><span class="pre">c'*x+d</span></tt> is zero or negative.</p>
+</div>
+<div class="section" id="set-membership">
+<span id="sets"></span><h2>Set membership<a class="headerlink" href="#set-membership" title="Permalink to this headline">¶</a></h2>
+<p>CVX supports the definition and use of convex sets. The base
+library includes the cone of positive semidefinite <span class="math">\(n \times n\)</span>
+matrices, the second-order or Lorentz cone,
+and various norm balls. A complete list of sets supplied in the base library
+is given in <a class="reference internal" href="funcref.html#sets-ref"><em>Sets</em></a>.</p>
+<p>Unfortunately, the Matlab language does not have a set membership
+operator, such as <tt class="docutils literal"><span class="pre">x</span> <span class="pre">in</span> <span class="pre">S</span></tt>, to denote <span class="math">\(x \in S\)</span>. So in CVX,
+we use a slightly different syntax to require that an expression is in a
+set. To represent a set we use a <em>function</em> that returns an unnamed
+variable that is required to be in the set. Consider, for example,
+<span class="math">\(\mathbf{S}^n_+\)</span>, the cone of symmetric positive semidefinite
+<span class="math">\(n \times n\)</span> matrices. In CVX, we represent this by the
+function semidefinite(n), which returns an unnamed new variable,
+that is constrained to be positive semidefinite. To require that the
+matrix expression X be symmetric positive semidefinite, we use the
+syntax</p>
+<div class="highlight-none"><div class="highlight"><pre>X == semidefinite(n)
+</pre></div>
+</div>
+<p>The literal meaning of this is that
+<tt class="docutils literal"><span class="pre">X</span></tt> is constrained to be equal to some unnamed variable, which is
+required to be an <span class="math">\(n \times n\)</span> symmetric positive semidefinite
+matrix. This is, of course, equivalent to saying that X must itself be
+symmetric positive semidefinite.</p>
+<p>As an example, consider the constraint that a (matrix) variable X
+is a correlation matrix, i.e., it is symmetric, has unit diagonal
+elements, and is positive semidefinite. In CVX we can declare such a
+variable and impose these constraints using</p>
+<div class="highlight-none"><div class="highlight"><pre>variable X(n,n) symmetric;
+X == semidefinite(n);
+diag(X) == 1;
+</pre></div>
+</div>
+<p>The second line here imposes the constraint that X be positive
+semidefinite. (You can read &#8220;==&#8221; here as &#8220;is&#8221; or &#8220;is in&#8221;, so the
+second line can be read as X is positive semidefinite&#8217;.) The
+lefthand side of the third line is a vector containing the diagonal
+elements of X, whose elements we require to be equal to one.</p>
+<p>If this use of equality constraints to represent set membership remains
+confusing or simply aesthetically displeasing, we have created a
+&#8220;pseudo-operator&#8221; <tt class="docutils literal"><span class="pre">&lt;In&gt;</span></tt> that you can use in its place. So, for
+example, the semidefinite constraint above can be replaced by</p>
+<div class="highlight-none"><div class="highlight"><pre>X &lt;In&gt; semidefinite(n);
+</pre></div>
+</div>
+<p>This is exactly equivalent to using the equality constraint operator,
+but if you find it more pleasing, feel free to use it. Implementing this
+operator required some Matlab trickery, so don&#8217;t expect to be able to
+use it outside of CVX models.</p>
+<p>Sets can be combined in affine expressions, and we can constrain an
+affine expression to be in a convex set. For example, we can impose a
+constraint of the form</p>
+<div class="highlight-none"><div class="highlight"><pre>A*X*A&#39;-X &lt;In&gt; B*semidefinite(n)*B&#39;;
+</pre></div>
+</div>
+<p>where X is an <span class="math">\(n \times n\)</span> symmetric variable matrix, and
+A and B are <span class="math">\(n \times n\)</span> constant matrices. This
+constraint requires that <span class="math">\(AXA^T-X=BYB^T\)</span>, for some
+<span class="math">\(Y \in \mathbf{S}^n_+\)</span>.</p>
+<p>CVX also supports sets whose elements are ordered lists of
+quantities. As an example, consider the second-order or Lorentz cone,</p>
+<div class="math">
+\[\mathbf{Q}^m = \left\{\, (x,y) \in \mathbf{R}^m\times\mathbf{R}\,~|~\, \| x \|_2 \leq y \,\right\} = \operatorname{\textbf{epi}}\|\cdot\|_2,\]</div>
+<p>where <span class="math">\(\operatorname{\textbf{epi}}\)</span> denotes the epigraph of a
+function. An element of <span class="math">\(\mathbf{Q}^m\)</span> is an ordered list, with
+two elements: the first is an <span class="math">\(m\)</span>-vector, and the second is a
+scalar. We can use this cone to express the simple least-squares problem
+from the section <a class="reference external" href="#least-squares">Least squares</a> (in a fairly
+complicated way) as follows:</p>
+<div class="math">
+\[\begin{split}\begin{array}{ll}
+    \text{minimize}   &amp; y \\
+    \text{subject to} &amp; ( A x - b, y ) \in \mathbf{Q}^m.
+\end{array}\end{split}\]</div>
+<p>CVX uses Matlab&#8217;s cell array facility to mimic this notation:</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_begin
+    variables x(n) y;
+    minimize( y );
+    subject to
+        { A*x-b, y } &lt;In&gt; lorentz(m);
+cvx_end
+</pre></div>
+</div>
+<p>The function call <tt class="docutils literal"><span class="pre">lorentz(m)</span></tt> returns an unnamed variable (i.e., a pair
+consisting of a vector and a scalar variable), constrained to lie in the
+Lorentz cone of length <tt class="docutils literal"><span class="pre">m</span></tt>. So the constraint in this specification
+requires that the pair <tt class="docutils literal"><span class="pre">{</span> <span class="pre">A*x-b,</span> <span class="pre">y</span> <span class="pre">}</span></tt> lies in the appropriately-sized
+Lorentz cone.</p>
+</div>
+<div class="section" id="dual-variables">
+<span id="id4"></span><h2>Dual variables<a class="headerlink" href="#dual-variables" title="Permalink to this headline">¶</a></h2>
+<p>When a disciplined convex program is solved, the associated <em>dual
+problem</em> is also solved. (In this context, the original problem is
+called the <em>primal problem</em>.) The optimal dual variables, each of which
+is associated with a constraint in the original problem, give valuable
+information about the original problem, such as the sensitivities with
+respect to perturbing the constraints (<em>c.f.</em> <a class="reference external" href="http://www.stanford.edu/~boyd/cvxbook">Convex
+Optimization</a>, chapter 5). To
+get access to the optimal dual variables in CVX, you simply declare
+them, and associate them with the constraints. Consider, for example,
+the LP</p>
+<div class="math">
+\[\begin{split}\begin{array}{llcll}
+    \mbox{minimize} &amp; c^Tx \\
+    \mbox{subject to} &amp; Ax \preceq b,
+\end{array}\end{split}\]</div>
+<p>with variable <span class="math">\(x\in\mathbf{R}^n\)</span>, and <span class="math">\(m\)</span> inequality
+constraints.  To associate
+the dual variable <span class="math">\(y\)</span> with the inequality
+constraint <span class="math">\(Ax\preceq b\)</span> in this LP, we use the following
+syntax:</p>
+<div class="highlight-none"><div class="highlight"><pre>n = size(A,2);
+cvx_begin
+    variable x(n);
+    dual variable y;
+    minimize( c&#39; * x );
+    subject to
+        y : A * x &lt;= b;
+cvx_end
+</pre></div>
+</div>
+<p>The line</p>
+<div class="highlight-none"><div class="highlight"><pre>dual variable y
+</pre></div>
+</div>
+<p>tells CVX that y will represent the dual variable, and the line</p>
+<div class="highlight-none"><div class="highlight"><pre>y : A * x &lt;= b;
+</pre></div>
+</div>
+<p>associates it with the inequality constraint. Notice how the colon <tt class="docutils literal"><span class="pre">:</span></tt>
+operator is being used in a different manner than in standard Matlab,
+where it is used to construct numeric sequences like <tt class="docutils literal"><span class="pre">1:10</span></tt>. This new
+behavior is in effect only when a dual variable is present, so there
+should be no confusion or conflict. No dimensions are given for <tt class="docutils literal"><span class="pre">y</span></tt>;
+they are automatically determined from the constraint with which it is
+associated. For example, if <span class="math">\(m=20\)</span>, typing <tt class="docutils literal"><span class="pre">y</span></tt> at the Matlab
+command prompt immediately before cvx_end yields</p>
+<div class="highlight-none"><div class="highlight"><pre>y =
+    cvx dual variable (20x1 vector)
+</pre></div>
+</div>
+<p>It is not necessary to place the dual variable on the left side of the
+constraint; for example, the line above can also be written in this way:</p>
+<div class="highlight-none"><div class="highlight"><pre>A * x &lt;= b : y;
+</pre></div>
+</div>
+<p>In addition, dual variables for inequality constraints will always be
+nonnegative, which means that the sense of the inequality can be
+reversed without changing the dual variable&#8217;s value; i.e.,</p>
+<div class="highlight-none"><div class="highlight"><pre>b &gt;= A * x : y;
+</pre></div>
+</div>
+<p>yields an identical result. For <em>equality</em> constraints, on the other
+hand, swapping the left- and right- hand sides of an equality constraint
+will <em>negate</em> the optimal value of the dual variable.</p>
+<p>After the <tt class="docutils literal"><span class="pre">cvx_end</span></tt> statement is processed, and assuming the
+optimization was successful, CVX assigns numerical values to <tt class="docutils literal"><span class="pre">x</span></tt>
+and <tt class="docutils literal"><span class="pre">y</span></tt>&#8212;the optimal primal and dual variable values, respectively.
+Optimal primal and dual variables for this LP must satisfy the
+<em>complementary slackness conditions</em></p>
+<div class="math">
+\[y_i ( b - A x )_i = 0, \quad i=1,\dots,m.\]</div>
+<p>You can check this in Matlab with the line</p>
+<div class="highlight-none"><div class="highlight"><pre>y .* (b-A*x)
+</pre></div>
+</div>
+<p>which prints out the products of the entries of <tt class="docutils literal"><span class="pre">y</span></tt> and <tt class="docutils literal"><span class="pre">b-A*x</span></tt>,
+which should be nearly zero. This line must be executed <em>after</em> the
+<tt class="docutils literal"><span class="pre">cvx_end</span></tt> command (which assigns numerical values to <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt>);
+it will generate an error if it is executed inside the CVX
+specification, where <tt class="docutils literal"><span class="pre">y</span></tt> and <tt class="docutils literal"><span class="pre">b-A*x</span></tt> are still just abstract
+expressions.</p>
+<p>If the optimization is <em>not</em> successful, because either the problem is
+infeasible or unbounded, then <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> will have different
+values. In the unbounded case, <tt class="docutils literal"><span class="pre">x</span></tt> will contain an <em>unbounded
+direction</em>; <em>i.e.</em>, a point <span class="math">\(x\)</span> satisfying</p>
+<div class="math">
+\[c^T x = -1, \quad A x \preceq 0,\]</div>
+<p>and <tt class="docutils literal"><span class="pre">y</span></tt> will be filled with <tt class="docutils literal"><span class="pre">NaN</span></tt> values, reflecting the fact that
+the dual problem is infeasible. In the infeasible case, x is filled
+with <tt class="docutils literal"><span class="pre">NaN</span></tt> values, while y contains an <em>unbounded dual direction</em>;
+<em>i.e.</em>, a point <span class="math">\(y\)</span> satisfying</p>
+<div class="math">
+\[b^T y = -1, \quad A^T y = 0, \quad y \succeq 0\]</div>
+<p>Of course, the precise interpretation of primal and dual points and/or
+directions depends on the structure of the problem. See references such
+as <a class="reference external" href="http://www.stanford.edu/~boyd/cvxbook">Convex Optimization</a> for
+more on the interpretation of dual information.</p>
+<p>CVX also supports the declaration of <em>indexed</em> dual variables. These
+prove useful when the <em>number</em> of constraints in a model (and,
+therefore, the number of dual variables) depends upon the parameters
+themselves. For more information on indexed dual variables, see
+<a class="reference internal" href="advanced.html#indexed-dual"><em>Indexed dual variables</em></a>.</p>
+</div>
+<div class="section" id="assignment-and-expression-holders">
+<span id="assignment"></span><h2>Assignment and expression holders<a class="headerlink" href="#assignment-and-expression-holders" title="Permalink to this headline">¶</a></h2>
+<p>Anyone with experience with C or Matlab understands the difference between the
+single-equal <em>assignment</em> operator <tt class="docutils literal"><span class="pre">=</span></tt> and the double-equal <em>equality</em> operator <tt class="docutils literal"><span class="pre">==</span></tt>.
+This distinction is vitally important in CVX as well, and CVX takes steps to ensure
+that assignments are not used improperly. For instance, consider the following code snippet:</p>
+<div class="highlight-none"><div class="highlight"><pre>variable X(n,n) symmetric;
+X = semidefinite(n);
+</pre></div>
+</div>
+<p>At first glance, the statement <tt class="docutils literal"><span class="pre">X</span> <span class="pre">=</span> <span class="pre">semidefinite(n);</span></tt> may look like it
+constrains <tt class="docutils literal"><span class="pre">X</span></tt> to be positive semidefinite. But since the assignment operator is
+used, <tt class="docutils literal"><span class="pre">X</span></tt> is actually <em>overwritten</em> by the anonymous semidefinite variable instead.
+Fortunately, CVX forbids declared variables from being overwritten in this way; when
+<tt class="docutils literal"><span class="pre">cvx_end</span></tt> is reached, this model would issue the following error:</p>
+<div class="highlight-none"><div class="highlight"><pre>??? Error using ==&gt; cvx_end
+The following cvx variable(s) have been overwritten:
+   X
+This is often an indication that an equality constraint was
+written with one equals &#39;=&#39; instead of two &#39;==&#39;. The model
+must be rewritten before cvx can proceed.
+</pre></div>
+</div>
+<p>We hope that this check will prevent at least some typographical errors
+from having frustrating consequences in your models.</p>
+<p>Despite this warning, assignments can be genuinely useful, so we encourage their
+use with appropriate care. For instance, consider the following excerpt:</p>
+<div class="highlight-none"><div class="highlight"><pre>variables x y
+z = 2 * x - y;
+square( z ) &lt;= 3;
+quad_over_lin( x, z ) &lt;= 1;
+</pre></div>
+</div>
+<p>The construction <tt class="docutils literal"><span class="pre">z</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">-</span> <span class="pre">y</span></tt> is <em>not</em> an equality constraint; it
+is an assignment. It is storing an intermediate calculation
+<tt class="docutils literal"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">-</span> <span class="pre">y</span></tt>, which is an affine expression, which is then used later
+in two different constraints. We call <tt class="docutils literal"><span class="pre">z</span></tt> an <em>expression holder</em> to
+differentiate it from a formally declared CVX variable.</p>
+<p>Often it will be useful to accumulate an array of expressions into a
+single Matlab variable. Unfortunately, a somewhat technical detail of
+the Matlab object model can cause problems in such cases. Consider this
+construction:</p>
+<div class="highlight-none"><div class="highlight"><pre>variable u(9);
+x(1) = 1;
+for k = 1 : 9,
+    x(k+1) = sqrt( x(k) + u(k) );
+end
+</pre></div>
+</div>
+<p>This seems reasonable enough: <tt class="docutils literal"><span class="pre">x</span></tt> should be a vector whose first value
+is <tt class="docutils literal"><span class="pre">1</span></tt>, and whose subsequent values are concave CVX expressions.
+But if you try this in a CVX model, Matlab will give you a rather
+cryptic error:</p>
+<div class="highlight-none"><div class="highlight"><pre>??? The following error occurred converting from cvx to double:
+Error using ==&gt; double
+Conversion to double from cvx is not possible.
+</pre></div>
+</div>
+<p>The reason this occurs is that the Matlab variable <tt class="docutils literal"><span class="pre">x</span></tt> is initialized
+as a numeric array when the assignment <tt class="docutils literal"><span class="pre">x(1)=1</span></tt> is made; and Matlab
+will not permit CVX objects to be subsequently inserted into numeric
+arrays.</p>
+<p>The solution is to explicitly <em>declare</em> <tt class="docutils literal"><span class="pre">x</span></tt> to be an expression holder
+before assigning values to it. We have provided keywords expression
+and expressions for just this purpose, for declaring a single or
+multiple expression holders for future assignment. Once an expression
+holder has been declared, you may freely insert both numeric and CVX
+expressions into it. For example, the previous example can be corrected
+as follows:</p>
+<div class="highlight-none"><div class="highlight"><pre>variable u(9);
+expression x(10);
+x(1) = 1;
+for k = 1 : 9,
+    x(k+1) = sqrt( x(k) + u(k) );
+end
+</pre></div>
+</div>
+<p>CVX will accept this construction without error. You can then use
+the concave expressions <tt class="docutils literal"><span class="pre">x(1)</span></tt>, ..., <tt class="docutils literal"><span class="pre">x(10)</span></tt> in any appropriate ways;
+for example, you could maximize <tt class="docutils literal"><span class="pre">x(10)</span></tt>.</p>
+<p>The differences between a variable object and an expression
+object are quite significant. A variable object holds an
+optimization variable, and cannot be overwritten or assigned in the
+CVX specification. (After solving the problem, however, CVX will
+overwrite optimization variables with optimal values.) An expression
+object, on the other hand, is initialized to zero, and should be thought
+of as a temporary place to store CVX expressions; it can be assigned
+to, freely re-assigned, and overwritten in a CVX specification.</p>
+<p>Of course, as our first example shows, it is not always <em>necessary</em> to
+declare an expression holder before it is created or used. But doing so
+provides an extra measure of clarity to models, so we strongly recommend
+it.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="index.html">
+          <img class="logo" src="_static/cvxrlogo.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Basics</a><ul>
+<li><a class="reference internal" href="#cvx-begin-and-cvx-end"><tt class="docutils literal"><span class="pre">cvx_begin</span></tt> and <tt class="docutils literal"><span class="pre">cvx_end</span></tt></a></li>
+<li><a class="reference internal" href="#variables">Variables</a></li>
+<li><a class="reference internal" href="#objective-functions">Objective functions</a></li>
+<li><a class="reference internal" href="#constraints">Constraints</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#set-membership">Set membership</a></li>
+<li><a class="reference internal" href="#dual-variables">Dual variables</a></li>
+<li><a class="reference internal" href="#assignment-and-expression-holders">Assignment and expression holders</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="quickstart.html"
+                        title="previous chapter">A quick start</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dcp.html"
+                        title="next chapter">The DCP ruleset</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/basics.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul><h3>Other links</h3>
+<ul class="this-page-menu">
+<li><a href="CVX.pdf" target="_blank">Download the PDF</a></li>
+<li><a href="http://cvxr.com/cvx">CVX home page</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="dcp.html" title="The DCP ruleset"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="quickstart.html" title="A quick start"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright © 2012, CVX Research, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

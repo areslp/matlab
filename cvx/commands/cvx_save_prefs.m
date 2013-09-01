@@ -12,7 +12,7 @@ if isempty( cvx___ ), return; end
 cvx___.solvers.map.default = cvx___.solvers.selected;
 osolv = cvx___.solvers;
 try
-    [ cvx___.solvers.list.check, cvx___.solvers.list.solve ] = deal([]);
+    [ cvx___.solvers.list.check, cvx___.solvers.list.solve, cvx___.solvers.list.eargs ] = deal( {} );
     cvx___.solvers.active = 0;
     if strncmp( computer, 'PC', 2 ), fs = '\'; fsre = '\\'; else fs = '/'; fsre = '/'; end
     pfile = [ regexprep( prefdir(1), [ fsre, 'R\d\d\d\d\w$' ], '' ), fs, 'cvx_prefs.mat' ];
@@ -34,6 +34,6 @@ catch errmsg
     end
 end
 
-% Copyright 2012 CVX Research, Inc.
+% Copyright 2005-2013 CVX Research, Inc.
 % See the file COPYING.txt for full copyright information.
 % The command 'cvx_where' will show where this file is located.

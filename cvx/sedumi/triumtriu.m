@@ -1,13 +1,13 @@
-%                                                 y = triumtriu(r,u,K)
-% TRIUMTRIU  Computes y = r * u
+function z = triumtriu(x,y,K)
+% z = triumtriu(x,y,K)
+%
+% TRIUMTRIU  Computes y = x * y
 %   Both r and u should be upper triangular.
 %
 % **********  INTERNAL FUNCTION OF SEDUMI **********
 %
 % See also sedumi
 
-function y = triumtriu(r,u,K) %#ok
-%
 % This file is part of SeDuMi 1.1 by Imre Polik and Oleksandr Romanko
 % Copyright (C) 2005 McMaster University, Hamilton, CANADA  (since 1.1)
 %
@@ -36,9 +36,36 @@ function y = triumtriu(r,u,K) %#ok
 % along with this program; if not, write to the Free Software
 % Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
 % 02110-1301, USA
-%
 
-disp('The SeDuMi binaries are not installed.')
-disp('In Matlab, launch "install_sedumi" in the folder you put the SeDuMi files.')
-disp('For more information see the file Install.txt.')
-error(' ')
+Ks = K.s;
+if isempty(Ks),
+    z = [];
+    return
+end
+Kq = Ks .* Ks;
+nr = K.rsdpN;
+nc = length(Ks);
+N  = K.N - K.sblkstart(1) + 1;
+z  = zeros(N,1);
+xi = length(x) - N;
+zi = 0;
+for i = 1 : nc,
+    ki = Ks(i);
+    qi = Kq(i);
+    XX = x(xi+1:xi+qi);
+    YY = y(xi+1:xi+qi);
+    xi = xi + qi;
+    if i > nr,
+        XX = XX + 1j * x(xi+1:xi+qi);
+        YY = YY + 1j * y(xi+1:xi+qi);
+        xi = xi + qi;
+    end
+    ZZ = triu(reshape(XX,ki,ki)) * triu(reshape(YY,ki,ki));
+    ZZ = ZZ + triu(ZZ,1)';
+    z(zi+1:zi+qi) = real(ZZ);
+    zi = zi + qi;
+    if i > nr,
+        z(zi+1:zi+qi) = imag(ZZ);
+        zi = zi + qi;
+    end
+end

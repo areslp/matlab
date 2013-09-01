@@ -31,16 +31,15 @@ function epigraph( varargin )
 %
 %   See also VARIABLE, HYPOGRAPH.
 
-if ~iscellstr( varargin ),
-    error( 'EPIGRAPH must be used in command mode.' );
-elseif nargin ~= 2 || ~strcmpi( varargin{1}, 'variable' ),
-    error( 'Syntax: epigraph variable <variable>' );
-elseif ~isa( evalin( 'caller', 'cvx_problem', '[]' ), 'cvxprob' ),
-    error( 'EPIGRAPH can only be used within a CVX model.' );
-else
-    evalin( 'caller', sprintf( '%s ', 'variable', varargin{2:end}, ' epigraph_' ) );
+if nargin < 2,
+    error( 'Incorrect syntax for EPIGRAPH VARIABLE. Type HELP EPIGRAPH for details.' );
+elseif ~iscellstr( varargin ),
+    error( 'All arguments must be strings.' );
+elseif ~strcmp( varargin{1}, 'variable' ),
+    error( 'Incorrect syntax for EPIGRAPH VARIABLE. Type HELP EPIGRAPH for details.' );
 end
+evalin( 'caller', sprintf( '%s ', 'variable', varargin{2:end}, ' epigraph_' ) );
 
-% Copyright 2012 CVX Research, Inc.
+% Copyright 2005-2013 CVX Research, Inc.
 % See the file COPYING.txt for full copyright information.
 % The command 'cvx_where' will show where this file is located.

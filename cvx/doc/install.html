@@ -1,0 +1,251 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; CVX Users&#39; Guide</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0 (beta)',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="CVX Users&#39; Guide" href="index.html" />
+    <link rel="next" title="A quick start" href="quickstart.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="quickstart.html" title="A quick start"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation">
+<span id="install"></span><span id="index-0"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="supported-platforms">
+<h2>Supported platforms<a class="headerlink" href="#supported-platforms" title="Permalink to this headline">¶</a></h2>
+<p id="index-1">CVX is supported on 32-bit and 64-bit versions of Linux, Mac OSX, and Windows. For 32-bit
+platforms, MATLAB version 7.5 (R2007b) or later is required; for 64-bit platforms, MATLAB
+version 7.8 (R2009a) or later is required. There are some important platform-specific
+cautions, however:</p>
+<ul class="simple">
+<li>Gurobi support requires Matlab 7.7 (R2008b) or later.</li>
+<li>32-bit Linux: the Gurobi solver is not available for this platform, as Gurobi is phasing
+out support for 32-bit Linux altogether.</li>
+<li>Older versions of Mac OS X (e.g. 10.5) ship with Java 1.5. The standard version of
+CVX works properly on this platform, but CVX Professional support requires Java 1.6.
+To restore this support, upgrade your operating system or Java installation.</li>
+</ul>
+<p>As of version 2.0, support for versions 7.4 (R2007a) or older has been discontinued.
+If you need to use CVX with these older versions of Matlab, please use CVX 1.22 or
+earlier, which will remain available indefinitely on the CVX Research web site. However,
+this version is no longer supported, and will not receive bug fixes or improvements.
+We strongly encourage you to update your Matlab installation to the latest version
+possible.</p>
+</div>
+<div class="section" id="installation-instructions">
+<h2>Installation instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note" id="index-2">
+<p class="first admonition-title">Note</p>
+<p class="last">If you wish to use CVX with Gurobi or MOSEK, they must be installed and accessible
+from MATLAB <em>before</em> running <tt class="docutils literal"><span class="pre">cvx_setup</span></tt>. See <a class="reference internal" href="#extsolv"><em>below</em></a> for more details.</p>
+</div>
+<ol class="arabic">
+<li><p class="first">Retrieve the latest version of CVX from <a class="reference external" href="http://cvxr.com/cvx/download">the web site</a>.
+You can download the package as either a <tt class="docutils literal"><span class="pre">.zip</span></tt> file or a <tt class="docutils literal"><span class="pre">.tar.gz</span></tt> file.</p>
+</li>
+<li><p class="first">Unpack the file anywhere you like; a directory called <tt class="docutils literal"><span class="pre">cvx</span></tt> will be
+created. There are two important exceptions:</p>
+<ul class="simple">
+<li><em>Do not</em> place CVX in Matlab&#8217;s own <tt class="docutils literal"><span class="pre">toolbox</span></tt> directory.</li>
+<li><em>Do not</em> unpack a new version of CVX on top of an old one. We recommend moving the
+old version out of the way, but do not delete it until you are sure the new
+version is working as you expect.</li>
+</ul>
+</li>
+<li><p class="first">Start Matlab.</p>
+</li>
+<li><p class="first">Change directories to the top of the CVX distribution, and run  the <tt class="docutils literal"><span class="pre">cvx_setup</span></tt>
+command. For example, if you installed CVX into <tt class="docutils literal"><span class="pre">C:\Matlab\personal\cvx</span></tt> on
+Windows, type these commands:</p>
+<div class="highlight-none"><div class="highlight"><pre>cd C:\Matlab\personal\cvx
+cvx_setup
+</pre></div>
+</div>
+<p>at the Matlab command prompt. If you installed CVX into
+<tt class="docutils literal"><span class="pre">~/MATLAB/cvx</span></tt> on Linux or a Mac, type these commands:</p>
+<div class="highlight-none"><div class="highlight"><pre>cd ~/MATLAB/cvx
+cvx_setup
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">cvx_setup</span></tt> function performs a variety of tasks to verify that your
+installation is correct, sets your Matlab search path so it can find all of the CVX
+program files, and runs a simple test problem to verify the installation.</p>
+</li>
+<li><p class="first">In some cases&#8212;usually on Linux&#8212;the <tt class="docutils literal"><span class="pre">cvx_setup</span></tt> command may instruct you to
+create or modify a <tt class="docutils literal"><span class="pre">startup.m</span></tt> file that allows you to use CVX without having
+to type <tt class="docutils literal"><span class="pre">cvx_setup</span></tt> every time you re-start Matlab.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="installing-a-cvx-professional-license">
+<span id="licinstall"></span><span id="index-3"></span><h2>Installing a CVX Professional license<a class="headerlink" href="#installing-a-cvx-professional-license" title="Permalink to this headline">¶</a></h2>
+<p>If you acquire a license key for CVX Professional, the only change required to the above
+steps is to include the name of the license file as an input to the <tt class="docutils literal"><span class="pre">cvx_setup</span></tt> command.
+For example, if you saved your license file to <tt class="docutils literal"><span class="pre">~/licenses/cvx_license.mat</span></tt> on a Mac,
+this would be the modified command:</p>
+<div class="highlight-none"><div class="highlight"><pre>cd ~/MATLAB/cvx
+cvx_setup ~/licenses/cvx_license.mat
+</pre></div>
+</div>
+<p>If you have previously run <tt class="docutils literal"><span class="pre">cvx_setup</span></tt> without a license, or you need to replace your
+current license with a new one, simply run <tt class="docutils literal"><span class="pre">cvx_setup</span></tt> again with the filename.
+Once the license has been accepted and installed, you are free to move your license
+file anywhere you wish for safekeeping&#8212;CVX saves a copy in its preferences.</p>
+</div>
+<div class="section" id="solvers-included-with-cvx">
+<span id="extsolv"></span><span id="index-4"></span><h2>Solvers included with CVX<a class="headerlink" href="#solvers-included-with-cvx" title="Permalink to this headline">¶</a></h2>
+<p>All versions of CVX include copies of the solvers
+<a class="reference external" href="http://sedumi.ie.lehigh.edu/">SeDuMi</a>
+and
+<a class="reference external" href="http://www.math.nus.edu.sg/~mattohkc/sdpt3.html">SDPT3</a>
+in the directories <tt class="file docutils literal"><span class="pre">cvx/sedumi</span></tt> and <tt class="file docutils literal"><span class="pre">cvx/sdpt3</span></tt>, respectively. When you
+run <cite>cvx_setup</cite>, CVX will automatically add these solvers to its solver list.</p>
+<p>If you have downloaded a CVX Professional Solver Bundle, then the solvers
+<a class="reference external" href="http://gurobi.com">Gurobi</a>
+and/or
+<a class="reference external" href="http://mosek.com">MOSEK</a> will be included with CVX as well. Use of these
+solvers requires a CVX Professional license. You may also use your existing
+copies of these solvers with CVX as well. We have created special sections of
+this users&#8217; guide for each solver:</p>
+<ul class="simple">
+<li>Gurobi: <a class="reference internal" href="gurobi.html#gurobi"><em>Using Gurobi with CVX</em></a></li>
+<li>MOSEK: <a class="reference internal" href="mosek.html#mosek"><em>Using MOSEK with CVX</em></a></li>
+</ul>
+<p>For more general information on the solvers supported by CVX, an how to select a
+solver for your particular problem, see the <a class="reference internal" href="solver.html#solvers"><em>Solvers</em></a> section.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="index.html">
+          <img class="logo" src="_static/cvxrlogo.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#supported-platforms">Supported platforms</a></li>
+<li><a class="reference internal" href="#installation-instructions">Installation instructions</a></li>
+<li><a class="reference internal" href="#installing-a-cvx-professional-license">Installing a CVX Professional license</a></li>
+<li><a class="reference internal" href="#solvers-included-with-cvx">Solvers included with CVX</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="quickstart.html"
+                        title="next chapter">A quick start</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/install.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul><h3>Other links</h3>
+<ul class="this-page-menu">
+<li><a href="CVX.pdf" target="_blank">Download the PDF</a></li>
+<li><a href="http://cvxr.com/cvx">CVX home page</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="quickstart.html" title="A quick start"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright © 2012, CVX Research, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

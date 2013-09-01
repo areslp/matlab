@@ -17,13 +17,15 @@ function expressions( varargin )
 %
 %   See also EXPRESSION.
 
-if ~iscellstr( varargin ),
-    error( 'EXPRESSIONS must be used in command mode.' );
+if nargin < 1,
+    error( 'Incorrect syntax for EXPRESSIONS. Type HELP EXPRESSIONS for details.' );
+elseif ~iscellstr( varargin ),
+    error( 'All arguments must be strings.' );
 end
 for k = 1 : nargin,
     evalin( 'caller', [ 'expression ', varargin{k} ] );
 end
 
-% Copyright 2012 CVX Research, Inc. 
+% Copyright 2005-2013 CVX Research, Inc. 
 % See the file COPYING.txt for full copyright information.
 % The command 'cvx_where' will show where this file is located.

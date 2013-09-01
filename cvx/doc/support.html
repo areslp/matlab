@@ -1,0 +1,324 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Support &mdash; CVX Users&#39; Guide</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0 (beta)',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="CVX Users&#39; Guide" href="index.html" />
+    <link rel="next" title="Advanced topics" href="advanced.html" />
+    <link rel="prev" title="Reference guide" href="funcref.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="advanced.html" title="Advanced topics"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="funcref.html" title="Reference guide"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="support">
+<span id="id1"></span><h1>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h1>
+<p>The user base for CVX has grown to such an extent that full email-based
+support is no longer feasible for our free version of CVX. Therefore, we
+have created several avenues for obtaining support.</p>
+<p>For help on how to <em>use</em> CVX, this users&#8217; guide is your first line of support.
+Please make sure that you have attempted to find an answer to your question
+here before you pursue other avenues. We have placed this document
+<a class="reference external" href="http://cvxr.com/cvx/doc">online</a> and made it searchable in order to
+help you find the answers to the questions you may have.</p>
+<p>With a package like CVX that encapsulates such mathematical complexity, it can sometimes
+be unclear if a problem with a model is due to model formulation or a bug in CVX. See
+<a class="reference internal" href="#whatbug"><em>What is a bug?</em></a> below to help you discern the difference,
+and to determine the most appropriate channel for support.</p>
+<div class="section" id="the-cvx-forum">
+<h2>The CVX Forum<a class="headerlink" href="#the-cvx-forum" title="Permalink to this headline">¶</a></h2>
+<p>If your answers cannot be found here, consider posting your question
+to the <a class="reference external" href="http://ask.cvxr.com">CVX Forum</a>. This is a community forum
+that allows our users to submit questions and to answer other people&#8217;s questions.
+The forum uses the open-source <a class="reference external" href="http://www.askbot.com">Askbot</a> system, and its format
+should be familiar to anyone who participates in <a class="reference external" href="http://www.or-exchange.com">OR-Exchange</a>,
+<a class="reference external" href="http://stackoverflow.com">Stack Overflow</a>, or any one of the <a class="reference external" href="http://stackexchange.com">Stack Exchange</a>
+family of sites.</p>
+<p>We highly encourage our expert users who enjoy helping others to participate in
+this forum. We hope that it will not only serve as a resource for diagnosing problems
+and issues, but a clearinghouse for advanced usage tips and tricks.</p>
+</div>
+<div class="section" id="bug-reports">
+<h2>Bug reports<a class="headerlink" href="#bug-reports" title="Permalink to this headline">¶</a></h2>
+<p>If you believe you have found a <em>bug</em> in CVX or in one of the underlying solvers,
+then we encourage you to submit a bug report&#8212;either by email to
+to <tt class="docutils literal"><span class="pre">cvx&#64;cvxr.com</span></tt> or through our
+<a class="reference external" href="http://support.cvxr.com">web-based support portal</a>. Please include the following in your
+bug report so we can fully reproduce the problem:</p>
+<ol class="arabic simple">
+<li>the CVX model and supporting data that caused the error.</li>
+<li>a copy of any error messages that it produced</li>
+<li>the CVX version number and build number</li>
+<li>the version number of Matlab that you are running</li>
+<li>the name and version of the operating system you are using</li>
+</ol>
+<p>The easiest way to supply items 3-5 is to type <tt class="docutils literal"><span class="pre">cvx_version</span></tt> at the command
+prompt and copy its output into your email message.</p>
+<p>Please note that we do not own all of Matlab&#8217;s toolboxes. We cannot debug a model that
+employs functions from a toolbox we do not own.</p>
+</div>
+<div class="section" id="what-is-a-bug">
+<span id="whatbug"></span><h2>What <em>is</em> a bug?<a class="headerlink" href="#what-is-a-bug" title="Permalink to this headline">¶</a></h2>
+<p>Certain issues are unambiguously bugs, and you should feel free to report them
+immediately. In particular, CVX often attempts to catch unexpected errors in key
+places&#8212;including <tt class="docutils literal"><span class="pre">cvx_setup</span></tt>, <tt class="docutils literal"><span class="pre">cvx_end</span></tt>, etc. It will report those errors and
+instruct you to report them to us. If your model produces a MATLAB error that CVX
+did not itself generate, and you cannot readily tie it to a syntax error in your
+model, please report that as well.</p>
+<p>That said, because disciplined convex programming is a new concept for many, we often
+receive support requests for problems with their models that are not, in fact, bugs.
+A particularly common class of support requests are reports of models being rejected
+due to <tt class="docutils literal"><span class="pre">Disciplined</span></tt> <tt class="docutils literal"><span class="pre">convex</span></tt> <tt class="docutils literal"><span class="pre">programming</span></tt> <tt class="docutils literal"><span class="pre">error</span></tt> messages. For instance,
+the following code</p>
+<div class="highlight-none"><div class="highlight"><pre>variable x(10)
+norm(x) == 1
+</pre></div>
+</div>
+<p>will produce this error in CVX:</p>
+<div class="highlight-none"><div class="highlight"><pre>Error using cvxprob/newcnstr (line 181)
+Disciplined convex programming error:
+  Invalid constraint: {convex} == {real constant}
+</pre></div>
+</div>
+<p>Disciplined convex programming errors indicate that the model fails
+to adhere to the rules in the <a class="reference internal" href="dcp.html#dcp"><em>DCP ruleset</em></a>. In nearly all cases,
+this is <em>not</em> a bug, and should not be reported as such. Rather,
+the underlying issue falls into one of two categories:</p>
+<ol class="arabic">
+<li><p class="first">The model is <em>not convex</em> (mixed-integer or otherwise). A model with the
+nonlinear equation above would fall squarely in this category. CVX simply
+cannot solve such problems. In some cases,
+it is possible to transform a problem that is non-convex into one that is convex (for
+example, <a class="reference internal" href="gp.html#gp-mode"><em>geometric programs</em></a>). This has not been the case for any
+problem submitted by our users&#8212;so far.</p>
+</li>
+<li><p class="first">The model <em>is</em> convex, but it is still written in a manner that violates the rules.
+For instance, given the same vector <tt class="docutils literal"><span class="pre">x</span></tt> above, the constraint</p>
+<div class="highlight-none"><div class="highlight"><pre>sqrt( sum( square( x ) ) ) &lt;= 1
+</pre></div>
+</div>
+<p>is convex, but it violates the ruleset&#8212;so it is rejected. However, the
+mathematically equivalent form</p>
+<div class="highlight-none"><div class="highlight"><pre>norm( x ) &lt;= 1
+</pre></div>
+</div>
+<p>is acceptable.
+If your error is of this type, you will need to find a way to express your
+problem in a DCP-compliant manner. We have attempted to supply all of the commonly used
+functions that the underlying solvers can support; so if you cannot easily rewrite
+your problem using the functions supplied, it may not be possible. If you think this
+is a possibility, you may wish to see if the wizards on the
+<a class="reference external" href="http://ask.cvxr.com">CVX Forum</a> have suggestions for you.</p>
+</li>
+</ol>
+<p>In rare cases, users have discovered that certain models were rejected with
+<tt class="docutils literal"><span class="pre">Disciplined</span></tt> <tt class="docutils literal"><span class="pre">convex</span></tt> <tt class="docutils literal"><span class="pre">programming</span></tt> <tt class="docutils literal"><span class="pre">error</span></tt> messages
+even though they satisfied the <a class="reference internal" href="dcp.html#dcp"><em>DCP ruleset</em></a>.
+We have not received a bug report of this type in quite a long time, however, so we
+suspect our users have helped us iron out these issues.</p>
+</div>
+<div class="section" id="handling-numerical-issues">
+<h2>Handling numerical issues<a class="headerlink" href="#handling-numerical-issues" title="Permalink to this headline">¶</a></h2>
+<p>No developer likes to tell their customers that their software may not work for them.
+Alas, we have no choice. The fact is that we cannot guarantee that CVX will be able to
+solve your problem, <em>even if</em> it is formulated properly, even if it avoids the use of
+integer or binary variables, even if it is of reasonable size, even if it avoids the use
+of our experimental <a class="reference internal" href="advanced.html#successive"><em>exponential cone support</em></a>.</p>
+<p>We blame the solvers&#8212;but we must come to their defense, too.
+Even the best and most mature solvers will struggle with a particular problem that
+seems straightforward. Another solver may have no difficulty with that one, but fail
+to find an accurate solution on another. While sometimes these challenges are due
+to bugs in the solver&#8217;s implementation, quite often it is simply due to limits imposed
+by the nature of finite numerical precision computation. And different problems push
+those limits to different degrees. So the fact is that no solver is perfect, but
+no solver <em>can</em> be.</p>
+<p>When we consider <a class="reference internal" href="intro.html#what-is-midcp"><em>mixed-integer problems</em></a>, the situation is even worse.
+Solvers must perform what is effectively an exhaustive search among
+the integer variables to determine the correct solution. Yes, there are some intelligent
+and innovative ways to speed up that search, and the performance of mixed-integer
+solvers has improved dramatically over the years. But there will always be models for
+which the exhaustive search will simply take too long.</p>
+<p>None of this is much comfort if it is <em>your</em> model the solver is struggling with. Here
+are some practical tips if you encounter this problem:</p>
+<dl class="docutils">
+<dt><em>Try a different solver.</em></dt>
+<dd>Use the <tt class="docutils literal"><span class="pre">cvx_solver</span></tt> command for this. If you are using
+Gurobi or MOSEK, don&#8217;t hesitate to try one of the free solvers if they are compatible
+with your problem.</dd>
+<dt><em>Reduce the precision.</em></dt>
+<dd>Consider inserting <tt class="docutils literal"><span class="pre">cvx_precision</span> <span class="pre">medium</span></tt> or even
+<tt class="docutils literal"><span class="pre">cvx_precision</span> <span class="pre">low</span></tt> into your problem to see if that allows the solver to exit
+successfully. Of course, if it does succeed, make sure to check the results to see
+if they are acceptable for your application. If they are not, consider some of the
+other advice here to see if the solvability of your model may be improved.</dd>
+<dt><em>Remove constraints.</em></dt>
+<dd>If you think that one or more of the constraints might
+not be active at the solution, try removing them. If the solver terminates, you can
+confirm that your guess was correct by examining the solution to the modified problem.</dd>
+<dt><em>Add constraints</em>.</dt>
+<dd>Consider adding simple bounds to the constraints to reduce the size of
+the feasible set. This will sometimes improve the numerical conditioning of the problem.
+Make them as tight as you can without impinging on the optimal set. If this modified
+problem is successfully solved, check the solution to see if any of the added bounds
+are active. If they are, relax them, and try again.</dd>
+<dt><em>Watch for scaling issues.</em></dt>
+<dd>Scaling issues are the most vexing problems for numerical
+solvers to deal with. Solvers will often re-scale the problem to reduce the dynamic
+range of the numerical coefficients, but doing so sometimes leads to undesirable
+effects on the solution. It is better to avoid scaling issues during the modeling
+process. Don&#8217;t mix values of wildly different magnitudes, such as <tt class="docutils literal"><span class="pre">1e-3</span></tt>
+and <tt class="docutils literal"><span class="pre">1e20</span></tt>. Even better, try to avoid any numerical values (both in fixed parameters
+and likely values of the variables) that exceed <tt class="docutils literal"><span class="pre">1e8</span></tt> in absolute value.</dd>
+<dt><em>Try equivalent reformulations.</em></dt>
+<dd>It is quite likely that your model can be expressed
+in a variety of different ways. Certainly, you should begin with the most obvious
+and natural formulation; but if you encounter numerical issues, a reformulation may
+often solve them. One reformulation we highly recommend is to eliminate quadratic
+forms; see <a class="reference internal" href="advanced.html#quad-forms"><em>this section</em></a> for more details.</dd>
+<dt><em>Reach out to the CVX Forum.</em></dt>
+<dd>Share your struggles with the
+<a class="reference external" href="http://ask.cvxr.com">larger CVX community</a>! Perhaps
+they will have concrete suggestions for improving the solvability of your model.</dd>
+</dl>
+</div>
+<div class="section" id="cvx-professional-support">
+<h2>CVX Professional support<a class="headerlink" href="#cvx-professional-support" title="Permalink to this headline">¶</a></h2>
+<p>Paid CVX Professional users will receive support through a trouble-ticket support system,
+so that they can have confidence that their issues are being addressed promptly. This
+infrastructure is still under development; we will update this section and the Web site
+with more information once it has been completed.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="index.html">
+          <img class="logo" src="_static/cvxrlogo.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Support</a><ul>
+<li><a class="reference internal" href="#the-cvx-forum">The CVX Forum</a></li>
+<li><a class="reference internal" href="#bug-reports">Bug reports</a></li>
+<li><a class="reference internal" href="#what-is-a-bug">What <em>is</em> a bug?</a></li>
+<li><a class="reference internal" href="#handling-numerical-issues">Handling numerical issues</a></li>
+<li><a class="reference internal" href="#cvx-professional-support">CVX Professional support</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="funcref.html"
+                        title="previous chapter">Reference guide</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="advanced.html"
+                        title="next chapter">Advanced topics</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/support.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul><h3>Other links</h3>
+<ul class="this-page-menu">
+<li><a href="CVX.pdf" target="_blank">Download the PDF</a></li>
+<li><a href="http://cvxr.com/cvx">CVX home page</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="advanced.html" title="Advanced topics"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="funcref.html" title="Reference guide"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright © 2012, CVX Research, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

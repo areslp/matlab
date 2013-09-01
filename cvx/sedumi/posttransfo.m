@@ -1,5 +1,6 @@
 function [xp,yp,K] = posttransfo(x,y,prep,K,pars)
-%                                       [xp,yp] = posttransfo(x,y,prep,K)
+% [xp,yp] = posttransfo(x,y,prep,K)
+%
 % POSTTRANSFO  Transforms (x,y) from internal SeDuMi format into original
 %   user format.
 %
@@ -7,7 +8,6 @@ function [xp,yp,K] = posttransfo(x,y,prep,K,pars)
 %
 % See also sedumi
 
-%
 % This file is part of SeDuMi 1.1 by Imre Polik and Oleksandr Romanko
 % Copyright (C) 2005 McMaster University, Hamilton, CANADA  (since 1.1)
 %
@@ -36,7 +36,6 @@ function [xp,yp,K] = posttransfo(x,y,prep,K,pars)
 % along with this program; if not, write to the Free Software
 % Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
 % 02110-1301, USA
-%
 
 K.l = K.l - 1;       % remove artificial var of self-dual embedding
 xp=x(2:end);
@@ -50,14 +49,13 @@ end
 % Transform LQ-vars into F-vars (free)
 % ------------------------------------------------------------
 K.f = prep.Kf;
-if K.f>0
-    switch pars.free
-        case 0
-            K.l = K.l - 2 * K.f;
-            xp = [xp(K.f+1 : 2*K.f) - xp(1:K.f); xp(2*K.f+1:end)];
-        otherwise
-            K.q=K.q(2:end);
-            xp=[xp(K.l+2:K.l+K.f+1);xp(1:K.l);xp(K.l+K.f+2:end)];
+if K.f > 0
+    if pars.free == 0 || pars.free == 2 && isempty(K.q) && isempty(K.s),
+        K.l = K.l - 2 * K.f;
+        xp = [xp(K.f+1 : 2*K.f) - xp(1:K.f); xp(2*K.f+1:end)];
+    else
+        K.q=K.q(2:end);
+        xp=[xp(K.l+2:K.l+K.f+1);xp(1:K.l);xp(K.l+K.f+2:end)];
     end
 end
 
@@ -87,7 +85,7 @@ if pars.sdp==1 && isfield(prep,'sdp')
     xp=xp(K.f+1:end);
     Kf=K.f;
     K.f=0;
-    [xp,yp,K]=postprocessSDP(xp,y,prep.sdp,K);
+    [xp,yp,K]=postprocessSDP(xp,y,prep.sdp,K); %#ok
     xp=[xpf;xp];
     K.f=Kf;
     clear Kf xpf

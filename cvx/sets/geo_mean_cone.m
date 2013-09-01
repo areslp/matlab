@@ -332,7 +332,7 @@ cvx_begin set
     end
     if isempty( cone ),
         cone = semidefinite( [2,2,nm,nv] );
-    else
+    elseif nm > 1,
         cone = cat( 3, semidefinite( [2,2,nm-1,nv] ), cone );
     end
     xt = [ x ; xw ; xa ]; %#ok
@@ -361,6 +361,6 @@ x = reshape( x, sx );
 y = reshape( y, sy );
 cvx_optpnt = cvxtuple( struct( 'x', x, 'y', y ) );
 
-% Copyright 2012 CVX Research, Inc.
+% Copyright 2005-2013 CVX Research, Inc.
 % See the file COPYING.txt for full copyright information.
 % The command 'cvx_where' will show where this file is located.

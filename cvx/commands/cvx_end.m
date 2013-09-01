@@ -9,18 +9,17 @@ function cvx_end
 global cvx___
 prob = evalin( 'caller', 'cvx_problem', '[]' );
 if ~isa( prob, 'cvxprob' ),
-    error( 'No cvx problem exists in this scope.' );
-elseif index( prob ) ~= length( cvx___.problems ),
-    error( 'Internal cvx data corruption.' );
+    error( 'No CVX model exists in this scope.' );
+elseif isempty( cvx___.problems ) || cvx___.problems( end ).self ~= prob,
+    error( 'Internal CVX data corruption. Please CLEAR ALL and rebuild your model.' );
 end
-p = index( prob );
-pstr = cvx___.problems( p );
+pstr = cvx___.problems( end );
 estruc = [];
 
 if isempty( pstr.objective ) && isempty( pstr.variables ) && isempty( pstr.duals ) && nnz( pstr.t_variable ) == 1,
 
     warning( 'CVX:EmptyModel', 'Empty cvx model; no action taken.' );
-    evalin( 'caller', 'cvx_pop( cvx_problem, ''none'' )' );
+    evalin( 'caller', 'pop( cvx_problem, ''none'' )' );
 
 elseif pstr.complete && nnz( pstr.t_variable ) == 1,
 
@@ -48,17 +47,26 @@ elseif pstr.complete && nnz( pstr.t_variable ) == 1,
         ndxs = ndxs( cumsum( cellfun( 'length', fn2 ) ) ) ~= '_';
         fn2  = fn2( ndxs );
         vv2  = struct2cell( pstr.dvars );
-        vv2  = vv2(ndxs);
+        vv2  = vv2( ndxs );
     end
-    i1 = cvx_ids( vv1{:}, vv2{:} );
-    i2 = sprintf( '%s,', fn1{:}, fn2{:} );
-    i2 = evalin( 'caller', sprintf( 'cvx_ids( %s )', i2(1:end-1) ) );
-    tt = i1 ~= i2;
-    if any( tt ),
-        vv = [ fn1 ; fn2 ];
+    fn1 = [ fn1 ; fn2 ];
+    i1  = cvx_ids( vv1{:}, vv2{:} );
+    i2  = sprintf( '%s,', fn1{:} );
+    try
+        i2 = evalin( 'caller', sprintf( 'cvx_ids( %s )', i2(1:end-1) ) );
+    catch
+        i2 = zeros(1,numel(fn1));
+        for k = 1 : length(fn1),
+            try
+                i2(k) = evalin( 'caller', sprintf( 'cvx_ids( %s )', fn1{k} ) );
+            catch
+            end
+        end
+    end
+    if any( i1 ~= i2 ),
         evalin( 'caller', 'cvx_clear' );
-        temp = sprintf( ' %s', vv{tt} );
-        error( 'The following cvx variable(s) have been overwritten:\n  %s\nThis is often an indication that an equality constraint was\nwritten with one equals ''='' instead of two ''==''. The model\nmust be rewritten before cvx can proceed.', temp ); %#ok
+        temp = sprintf( ' %s', fn1{ i1 ~= i2 } );
+        error( 'The following cvx variable(s) have been cleared or overwritten:\n  %s\nThis is often an indication that an equality constraint was\nwritten with one equals ''='' instead of two ''==''. The model\nmust be rewritten before cvx can proceed.', temp ); %#ok
     end
 
     %
@@ -79,7 +87,7 @@ elseif pstr.complete && nnz( pstr.t_variable ) == 1,
         solve( prob );
     catch estruc
     end
-    pstr = cvx___.problems( p );
+    pstr = cvx___.problems( end );
 
     %
     % Pause again!
@@ -117,7 +125,7 @@ elseif pstr.complete && nnz( pstr.t_variable ) == 1,
     % Compute the numerical values and clear out
     %
 
-    evalin( 'caller', 'cvx_pop( cvx_problem, ''value'' )' );
+    evalin( 'caller', 'pop( cvx_problem, ''value'' )' );
 
 else
 
@@ -125,7 +133,8 @@ else
     % Determine the parent problem
     %
 
-    if length( cvx___.problems ) < 2,
+    p = length( cvx___.problems );
+    if p < 2,
         error( 'Internal cvx data corruption.' );
     end
     np = p - 1;
@@ -173,11 +182,11 @@ else
 
     assignin( 'caller', 'cvx_optpnt', cvxtuple( cvx_collapse( vars, false, false ) ) );
     assignin( 'caller', 'cvx_optdpt', cvxtuple( cvx_collapse( dvars, false, false ) ) );
-    x = prob.objective;
+    x = pstr.objective;
     if isempty( x ),
 
         assignin( 'caller', 'cvx_optval', 0 );
-        temp = length( cvx___.problems( p ).t_variable ) + 1 : length( cvx___.readonly );
+        temp = length( pstr.t_variable ) + 1 : length( cvx___.readonly );
         cvx___.readonly( temp ) = cvx___.readonly( temp ) - 1;
 
     else
@@ -232,8 +241,7 @@ else
     % Set the status and clear the problem from internal storage
     %
 
-    assignin( 'caller', 'cvx_status', 'Incorporated' );
-    evalin( 'caller', 'cvx_pop( cvx_problem, ''none'' )' );
+    evalin( 'caller', 'pop( cvx_problem, ''none'' )' );
 
 end
 
@@ -251,6 +259,6 @@ if ~isempty( estruc ),
     end
 end
 
-% Copyright 2012 CVX Research, Inc.
+% Copyright 2005-2013 CVX Research, Inc.
 % See the file COPYING.txt for full copyright information.
 % The command 'cvx_where' will show where this file is located.

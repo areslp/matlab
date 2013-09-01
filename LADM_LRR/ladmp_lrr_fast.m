@@ -92,7 +92,7 @@ while iter<maxIter
     % tic
     M = A.U*diag(A.s)*A.V' + X'*(X - XZ - E + Y/mu)/eta;
 
-    [A.U,A.s,A.V]=singular_value_shrinkage_implicit(M,1/(mu*eta));
+    [A.U,A.s,A.V,svp]=singular_value_shrinkage_implicit(M,1/(mu*eta));
     
     % [U, S, V] = lansvd('Axz','Atxz', n, n, sv, 'L', opt);
     % %[U, S, V] = lansvd('Axz','Atxz', n, n, sv, 'L');

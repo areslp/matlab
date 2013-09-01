@@ -1,6 +1,7 @@
 function [ZZ,Z,E] = multi_lrr(X,lambda,alpha)
 % implement the algorithm described in paper "Multi-task Low-rank Affinity Pursuit for Image Segmentation"
-% for test use, hard code the affinity matrix number
+% solve \sum_{i=1}^k(||J_i||_*+lambda||E_i||_{2,1})+alpha||ZZ||_{2,1} s.t. X=XS+E,Z=J,Z=S
+
 k=size(X,1); % k*1 cell array, k views
 [m,n]=size(X{1}); % every view has the same dimension
 % initial matrix cell array
@@ -60,8 +61,8 @@ max_mu=10^10;
 rho=1.9;
 % epsilon=1e-4;
 % epsilon2=1e-5; % must be small!
-epsilon=1e-6;
-epsilon2=1e-5; % must be small!
+epsilon=1e-8; % 1e-5
+epsilon2=1e-8; % must be small! 1e-4
 
 % pre caculate matrix value
 xtx=cell(k,1);
@@ -98,7 +99,7 @@ F=cell(k,1);
 
 M=cell(k,1);
 
-MAX_ITER=1000;
+MAX_ITER=100000000;
 iter=0;
 convergenced=false;
 
@@ -126,15 +127,21 @@ while ~convergenced
     [M]=cellfun(@updateM,F,'UniformOutput',false);
     MM=zeros(k,n*n);
     for i=1:k
-        MM(i,:)=M{i};
+		% TODO: normalize
+		% fprintf(1,'M{%d}, max: %f, min: %f\n',i,max(max(M{i})),min(min(M{i})));
+        % M{i} = (M{i} - min(M{i}(:))) ./ (max(M{i}(:))-min(M{i}(:)));
+		% fprintf(1,'M{%d},max: %f, min: %f\n',i,max(max(M{i})),min(min(M{i})));
+		MM(i,:)=M{i};
     end
+	% fprintf(1,'============================================================\n');
     ZZ=l21(MM,alpha/(2*mu));
     % update Z_i
     for i=1:k
         Zk{i}=Z{i};
         Z{i}=reshape(ZZ(i,:),n,n)';
+        % fprintf(1,'Z changed by L21, the diff between Z%d{%d} and Z{%d} is %e\n',iter,i,i,norm(Zk{i}-Z{i}));
         % Z{i}=Z{i}-diag(diag(Z{i}));
-        Z{i}=max(Z{i},0);
+        % Z{i}=max(Z{i},0);
     end
 
     % TODO: for debug
@@ -158,17 +165,17 @@ while ~convergenced
     if mod(iter,50)==0
         fprintf(1,'===========================================================================================================\n');
         fprintf(1,'gap between two iteration is %f,mu is %f\n',gap,mu);
-        fprintf(1,'iter %d,mu is %f,ResidualX is %f,changeZJ is %f,changeZS is %f\n',iter,mu,changeX,changeZJ,changeZS);
+        fprintf(1,'iter %d,mu is %e,ResidualX is %e,changeZJ is %e,changeZS is %e\n',iter,mu,changeX,changeZJ,changeZS);
         for i=1:k
             fprintf(1,'svp%d %d,',i,svp{i});
         end
         fprintf(1,'\n');
     end
-    % if changeX <= epsilon && changeZJ <= epsilon && changeZS <= epsilon
-    if changeX <= epsilon && gap <=epsilon2 && changeZJ <= epsilon && changeZS <= epsilon
+    if changeX <= epsilon && changeZJ <= epsilon && changeZS <= epsilon
+    % if changeX <= epsilon && gap <=epsilon2 && changeZJ <= epsilon && changeZS <= epsilon
         convergenced=true;
         fprintf(2,'convergenced, iter is %d\n',iter);
-        fprintf(2,'iter %d,mu is %f,ResidualX is %f,changeZJ is %f,changeZS is %f\n',iter,mu,changeX,changeZJ,changeZS);
+        fprintf(2,'iter %d,mu is %f,ResidualX is %e,changeZJ is %e,changeZS is %e\n',iter,mu,changeX,changeZJ,changeZS);
         for i=1:k
             fprintf(1,'svp%d %d,',i,svp{i});
         end
@@ -180,9 +187,9 @@ while ~convergenced
     [W]=cellfun(@updateW,W,cmu,ZJc,'UniformOutput',false);
     [V]=cellfun(@updateV,V,cmu,ZSc,'UniformOutput',false);
     % update parameters
-    if gap < epsilon2
+    % if gap < epsilon2
         mu=min(rho*mu,max_mu);
-    end
+    % end
     iter=iter+1;
 end
 toc
@@ -196,8 +203,9 @@ toc
 function [J, svp, sv] = updateJ(Z,W,mu,sv)
     % [J,svp,sv]=singular_value_shrinkage_acc(Z+W/mu,1/mu,sv);
     [J,svp]=singular_value_shrinkage(Z+W/mu,1/mu); % TODO: sometimes PROPACK is slower than full svd, and sometimes it will throw the following error
+    % J = (J - min(J(:))) ./ (max(J(:))-min(J(:))); % TODO: 有可能除0了
     % J=J-diag(diag(J));
-    J=max(J,0);
+    % J=max(J,0);
     % Error using vertcat
     % CAT arguments dimensions are not consistent.
 
@@ -211,8 +219,9 @@ function [J, svp, sv] = updateJ(Z,W,mu,sv)
 % S{i}=invx{i}*(xtx{i}-X{i}'*E{i}+Z{i}+(X{i}'*Y{i}+V{i}-W{i})/mu);
 function [S] = updateS(invx,xtx,X,E,Z,Y,V,W,mu)
     S=invx*(xtx-X'*E+Z+(X'*Y+V-W)/mu);
+    % S = (S - min(S(:))) ./ (max(S(:))-min(S(:)));
     % S=S-diag(diag(S));
-    S=max(S,0);
+    % S=max(S,0);
 
 % F{i}=(J{i}+S{i}-(W{i}+V{i})*mu)/2;
 function [F] = updateF(J,S,W,V,mu)
@@ -224,6 +233,7 @@ function [F] = updateF(J,S,W,V,mu)
     % T2=mnormalize_col(T2);
     % F=(J+S-(W+V)*mu)/2; % TODO: fix bug, not *mu, should be /mu
     F=(T1+T2)/2;
+    % F = (F - min(F(:))) ./ (max(F(:))-min(F(:)));
 
 % M{i}=reshape(F{i}',1,n*n);
 function [M] = updateM(F)
@@ -232,7 +242,8 @@ function [M] = updateM(F)
 
 % E{i}=l21(X{i}-X{i}*S{i}+Y{i}/mu,lambda/(2*mu));  % bug fixed, parameter should be lambda/(2*mu), not lambda/mu
 function [E] = updateE(X,S,Y,mu,lambda)
-    E=l21(X-X*S+Y/mu,lambda/(2*mu));
+    % E=l21(X-X*S+Y/mu,lambda/(2*mu)); % TODO: why 2*mu, I believe it should be mu!
+    E=l21(X-X*S+Y/mu,lambda/(mu));
 
 % Xc{i}=X{i}-X{i}*S{i}-E{i}; 
 % ZJc{i}=Z{i}-J{i};

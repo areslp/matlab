@@ -55,8 +55,8 @@ function [A,b,c,lenx,lbounds,times] = prelp(pname)
 
 global OUTFID
 global Ubounds_exist
-
 if ~exist('loadata','file') || ~exist('preprocess','file')
+if ~exist('loadata','file') | ~exist('preprocess','file')
     error('To use PRELP, you need to have LIPSOL installed.')
 end
 
@@ -66,9 +66,9 @@ end
 if (nargin == 0)
     pname = input('Enter problem name: ','s');
 end
-
-t0 = cputime;
 [A,b,c,lbounds,ubounds,BIG] = loadata(pname);
+t0 = cputime;
+[A,b,c,lbounds,ubounds,BIG,NAME] = loadata(pname);
 times(1) = cputime - t0;
 
 %--------------------------------------------------
@@ -99,6 +99,8 @@ if Ubounds_exist
     A= [ A sparse(m,nub); sparse(1:nub,find(ubounds),1,nub,lenx) speye(nub) ];
     b = [b; nonzeros(ubounds)];
     c = [c; zeros(nub,1)];
+else
+    ubounds = [];
 end
 %--------------------------------------------------
 % LOCATE DENSE COLUMNS

@@ -1,0 +1,394 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Section 7.5.2: Experiment design</title>
+<link rel="canonical" href="http://cvxr.com/cvx/examples/cvxbook/Ch07_statistical_estim/html/expdesign.html">
+<link rel="stylesheet" href="../../../examples.css" type="text/css">
+</head>
+<body>
+<div id="header">
+<h1>Section 7.5.2: Experiment design</h1>
+Jump to:&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#source">Source code</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#output">Text output</a>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#plots">Plots</a>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="../../../index.html">Library index</a>
+</div>
+<div id="content">
+<a id="source"></a>
+<pre class="codeinput">
+<span class="comment">% Boyd &amp; Vandenberghe, "Convex Optimization"</span>
+<span class="comment">% Original version by Lieven Vandenberghe</span>
+<span class="comment">% Updated for CVX by Almir Mutapcic - Jan 2006</span>
+<span class="comment">% (a figure is generated)</span>
+<span class="comment">%</span>
+<span class="comment">% This is an example of D-optimal, A-optimal, and E-optimal</span>
+<span class="comment">% experiment designs.</span>
+
+<span class="comment">% problem data</span>
+m = 10;
+angles1 = linspace(3*pi/4,pi,m);
+angles2 = linspace(0,-pi/2,m);
+
+<span class="comment">% sensor positions</span>
+V = [3.0*[cos(angles1); sin(angles1)], <span class="keyword">...</span>
+     1.5*[cos(angles2); sin(angles2)]];
+p = size(V,2);
+n = 2;
+noangles = 5000;
+
+<span class="comment">% D-optimal design</span>
+<span class="comment">%</span>
+<span class="comment">%      maximize    log det V*diag(lambda)*V'</span>
+<span class="comment">%      subject to  sum(lambda)=1,  lambda &gt;=0</span>
+<span class="comment">%</span>
+
+<span class="comment">% setup the problem and solve it</span>
+cvx_begin
+  variable <span class="string">lambda(p)</span>
+  maximize ( det_rootn( V*diag(lambda)*V' ) )
+  subject <span class="string">to</span>
+    sum(lambda) == 1;
+    lambda &gt;= 0;
+cvx_end
+lambdaD = lambda; <span class="comment">% save the solution for confidence ellipsoids</span>
+
+<span class="comment">% plot results</span>
+figure(1)
+<span class="comment">% draw ellipsoid v'*W*v &lt;= 2</span>
+W = inv(V*diag(lambda)*V');
+angles = linspace(0,2*pi,noangles);
+R = chol(W);  <span class="comment">% W = R'*R</span>
+ellipsoid = sqrt(2)*(R\[cos(angles); sin(angles)]);
+d = plot(ellipsoid(1,:), ellipsoid(2,:), <span class="string">'--'</span>, 0,0,<span class="string">'+'</span>);
+set(d, <span class="string">'Color'</span>, [0 0.5 0]); set(d(2),<span class="string">'MarkerFaceColor'</span>,[0 0.5 0]);
+hold <span class="string">on</span>;
+
+dot=plot(V(1,:),V(2,:),<span class="string">'o'</span>);
+ind = find(lambda &gt; 0.001);
+dots = plot(V(1,ind),V(2,ind),<span class="string">'o'</span>);
+set(dots,<span class="string">'MarkerFaceColor'</span>,<span class="string">'blue'</span>);
+
+<span class="comment">% print out nonzero lambda</span>
+disp(<span class="string">'Nonzero lambda values for D design:'</span>);
+<span class="keyword">for</span> i=1:length(ind)
+   text(V(1,ind(i)),V(2,ind(i)), [<span class="string">'l'</span>,int2str(ind(i))]);
+   disp([<span class="string">'lambda('</span>,int2str(ind(i)),<span class="string">') = '</span>, num2str(lambda(ind(i)))]);
+<span class="keyword">end</span>;
+
+<span class="comment">%axis([-4.5 4.5 -4.5 4.5])</span>
+axis([-5 5 -5 5])
+set(gca,<span class="string">'Xtick'</span>,[]);
+set(gca,<span class="string">'Ytick'</span>,[]);
+hold <span class="string">off</span>, axis <span class="string">off</span>
+<span class="comment">% print -deps Ddesign.eps</span>
+
+<span class="comment">% A-optimal design</span>
+<span class="comment">%</span>
+<span class="comment">%      minimize    Trace (sum_i lambdai*vi*vi')^{-1}</span>
+<span class="comment">%      subject to  lambda &gt;= 0, 1'*lambda = 1</span>
+<span class="comment">%</span>
+
+<span class="comment">% SDP formulation</span>
+e = eye(2,2);
+cvx_begin <span class="string">sdp</span>
+  variables <span class="string">lambda(p)</span> <span class="string">u(n)</span>
+  minimize ( sum(u) )
+  subject <span class="string">to</span>
+    <span class="keyword">for</span> k = 1:n
+      [ V*diag(lambda)*V'  e(:,k);
+        e(k,:)             u(k)   ] &gt;= 0;
+    <span class="keyword">end</span>
+    sum(lambda) == 1;
+    lambda &gt;= 0;
+cvx_end
+lambdaA = lambda; <span class="comment">% save the solution for confidence ellipsoids</span>
+
+<span class="comment">% plot results</span>
+figure(2)
+<span class="comment">% draw ellipsoid v'*W*v &lt;= mu</span>
+W = inv(V*diag(lambda)*V')^2;
+mu = diag(V'*W*V);
+mu = mean(mu(ind));
+angles = linspace(0,2*pi,noangles);
+R = chol(W);  <span class="comment">% W = R'*R</span>
+ellipsoid = sqrt(mu)*(R\[cos(angles); sin(angles)]);
+d = plot(ellipsoid(1,:), ellipsoid(2,:), <span class="string">'--'</span>,0,0,<span class="string">'+'</span>);
+set(d, <span class="string">'Color'</span>, [0 0.5 0]);
+set(d(2), <span class="string">'MarkerFaceColor'</span>, [0 0.5 0]);
+hold <span class="string">on</span>
+
+dot = plot(V(1,:),V(2,:),<span class="string">'o'</span>);
+ind = find(lambda &gt; 0.001);
+dots = plot(V(1,ind),V(2,ind),<span class="string">'o'</span>);
+set(dots,<span class="string">'MarkerFaceColor'</span>,<span class="string">'blue'</span>);
+
+disp(<span class="string">'Nonzero lambda values for A design:'</span>);
+<span class="keyword">for</span> i=1:length(ind)
+   text(V(1,ind(i)),V(2,ind(i)), [<span class="string">'l'</span>,int2str(ind(i))]);
+   disp([<span class="string">'lambda('</span>,int2str(ind(i)),<span class="string">') = '</span>, num2str(lambda(ind(i)))]);
+<span class="keyword">end</span>;
+<span class="comment">%axis([-4.5 4.5 -4.5 4.5])</span>
+axis([-5 5 -5 5])
+set(gca,<span class="string">'Xtick'</span>,[]);
+set(gca,<span class="string">'Ytick'</span>,[]);
+axis <span class="string">off</span>, hold <span class="string">off</span>
+<span class="comment">% print -deps Adesign.eps</span>
+
+<span class="comment">% E-optimal design</span>
+<span class="comment">%</span>
+<span class="comment">%      minimize    w</span>
+<span class="comment">%      subject to  sum_i lambda_i*vi*vi' &gt;= w*I</span>
+<span class="comment">%                  lambda &gt;= 0,  1'*lambda = 1;</span>
+<span class="comment">%</span>
+
+cvx_begin <span class="string">sdp</span>
+  variables <span class="string">t</span> <span class="string">lambda(p)</span>
+  maximize ( t )
+  subject <span class="string">to</span>
+    V*diag(lambda)*V' &gt;= t*eye(n,n);
+    sum(lambda) == 1;
+    lambda &gt;= 0;
+cvx_end
+
+lambdaE = lambda; <span class="comment">% save the solution for confidence ellipsoids</span>
+
+figure(3)
+<span class="comment">% draw ellipsoid v'*W*v &lt;= mu</span>
+mu = diag(V'*W*V);
+mu = mean(mu(ind));
+angles = linspace(0,2*pi,noangles);
+R = chol(W);  <span class="comment">% W = R'*R</span>
+ellipsoid = sqrt(mu)*(R\[cos(angles); sin(angles)]);
+d = plot(ellipsoid(1,:), ellipsoid(2,:), <span class="string">'--'</span>, 0, 0, <span class="string">'+'</span>);
+set(d, <span class="string">'Color'</span>, [0 0.5 0]);
+set(d(2), <span class="string">'MarkerFaceColor'</span>, [0 0.5 0]);
+hold <span class="string">on</span>
+
+dot = plot(V(1,:),V(2,:),<span class="string">'o'</span>);
+lambda = lambda(1:p);
+ind = find(lambda &gt; 0.001);
+dots = plot(V(1,ind),V(2,ind),<span class="string">'o'</span>);
+set(dots,<span class="string">'MarkerFaceColor'</span>,<span class="string">'blue'</span>);
+
+disp(<span class="string">'Nonzero lambda values for E design:'</span>);
+<span class="keyword">for</span> i=1:length(ind)
+   text(V(1,ind(i)),V(2,ind(i)), [<span class="string">'l'</span>,int2str(ind(i))]);
+   disp([<span class="string">'lambda('</span>,int2str(ind(i)),<span class="string">') = '</span>, num2str(lambda(ind(i)))]);
+<span class="keyword">end</span>;
+<span class="comment">%axis([-4.5 4.5 -4.5 4.5])</span>
+axis([-5 5 -5 5])
+set(gca,<span class="string">'Xtick'</span>,[]);
+set(gca,<span class="string">'Ytick'</span>,[]);
+axis <span class="string">off</span>, hold <span class="string">off</span>
+<span class="comment">% print -deps Edesign.eps</span>
+
+
+<span class="comment">% confidence ellipsoids</span>
+eta = 6.2514; <span class="comment">% chi2inv(.9,3) value (command available in stat toolbox)</span>
+<span class="comment">% draw 90 percent confidence ellipsoid  for D design</span>
+W = V*diag(lambdaD)*V';
+angles = linspace(0,2*pi,noangles);
+R = chol(W);  <span class="comment">% W = R'*R</span>
+ellipsoid = sqrt(eta)*(R\[cos(angles); sin(angles)]);
+
+figure(4)
+plot(0,0,<span class="string">'ok'</span>,ellipsoid(1,:), ellipsoid(2,:), <span class="string">'-'</span>);
+text(ellipsoid(1,1100),ellipsoid(2,1100),<span class="string">'D'</span>);
+hold <span class="string">on</span>
+
+<span class="comment">% draw 90 percent confidence ellipsoid  for A design</span>
+W = V*diag(lambdaA)*V';
+angles = linspace(0,2*pi,noangles);
+R = chol(W);  <span class="comment">% W = R'*R</span>
+ellipsoid = sqrt(eta)*(R\[cos(angles); sin(angles)]);
+plot(0,0,<span class="string">'ok'</span>,ellipsoid(1,:), ellipsoid(2,:), <span class="string">'-'</span>);
+text(ellipsoid(1,1),ellipsoid(2,1),<span class="string">'A'</span>);
+
+<span class="comment">% draw 90 percent confidence ellipsoid  for E design</span>
+W = V*diag(lambdaE)*V';
+angles = linspace(0,2*pi,noangles);
+R = chol(W);  <span class="comment">% W = R'*R</span>
+ellipsoid = sqrt(eta)*(R\[cos(angles); sin(angles)]);
+d=plot(0,0,<span class="string">'ok'</span>,ellipsoid(1,:), ellipsoid(2,:), <span class="string">'-'</span>);
+set(d,<span class="string">'Color'</span>,[0 0.5 0]);
+text(ellipsoid(1,4000),ellipsoid(2,4000),<span class="string">'E'</span>);
+
+<span class="comment">% draw 90 percent confidence ellipsoid  for uniform design</span>
+W_u = inv(V*V'/p);
+R = chol(W_u);  <span class="comment">% W = R'*R</span>
+ellipsoid_u = sqrt(eta)*(R\[cos(angles); sin(angles)]);
+plot(ellipsoid_u(1,:), ellipsoid_u(2,:), <span class="string">'--'</span>);
+text(ellipsoid_u(1),ellipsoid_u(2),<span class="string">'U'</span>);
+set(gca,<span class="string">'Xtick'</span>,[]);
+set(gca,<span class="string">'Ytick'</span>,[]);
+axis <span class="string">off</span>
+<span class="comment">% print -deps confidence.eps</span>
+hold <span class="string">off</span>
+</pre>
+<a id="output"></a>
+<pre class="codeoutput">
+ 
+Calling SDPT3: 35 variables, 11 equality constraints
+------------------------------------------------------------
+
+ num. of constraints = 11
+ dim. of sdp    var  =  6,   num. of sdp  blk  =  2
+ dim. of linear var  = 21
+ dim. of free   var  =  1 *** convert ublk to lblk
+*******************************************************************
+   SDPT3: Infeasible path-following algorithms
+*******************************************************************
+ version  predcorr  gam  expon  scale_data
+   HKM      1      0.000   1        0    
+it pstep dstep pinfeas dinfeas  gap      prim-obj      dual-obj    cputime
+-------------------------------------------------------------------
+ 0|0.000|0.000|4.8e+02|4.9e+01|5.9e+03|-2.875957e-10  0.000000e+00| 0:0:00| chol  1  1 
+ 1|0.875|0.781|6.0e+01|1.1e+01|9.0e+02| 7.118271e+00 -2.554174e+01| 0:0:00| chol  1  1 
+ 2|0.943|0.862|3.5e+00|1.5e+00|1.0e+02| 6.657847e+00 -3.837796e+01| 0:0:00| chol  1  1 
+ 3|0.930|0.272|2.4e-01|1.1e+00|4.3e+01|-3.634210e-01 -3.600963e+01| 0:0:00| chol  1  1 
+ 4|1.000|0.913|3.3e-07|9.4e-02|4.6e+00|-1.156221e+00 -5.373577e+00| 0:0:00| chol  1  1 
+ 5|0.975|0.811|2.8e-08|1.8e-02|1.3e+00|-2.298010e+00 -3.488416e+00| 0:0:00| chol  1  1 
+ 6|0.796|0.626|6.6e-09|6.7e-03|6.3e-01|-2.902415e+00 -3.493317e+00| 0:0:00| chol  1  1 
+ 7|0.990|0.928|1.2e-08|4.8e-04|3.6e-02|-3.170678e+00 -3.203472e+00| 0:0:00| chol  1  1 
+ 8|0.985|0.987|1.0e-09|6.1e-06|4.7e-04|-3.181819e+00 -3.182255e+00| 0:0:00| chol  1  1 
+ 9|0.989|0.989|2.2e-09|3.5e-06|1.4e-05|-3.181979e+00 -3.181984e+00| 0:0:00| chol  1  1 
+10|1.000|0.989|2.0e-10|1.0e-07|4.2e-07|-3.181980e+00 -3.181981e+00| 0:0:00| chol  1  1 
+11|1.000|0.989|2.4e-12|3.2e-09|1.3e-08|-3.181981e+00 -3.181981e+00| 0:0:00|
+  stop: max(relative gap, infeasibilities) &lt; 1.49e-08
+-------------------------------------------------------------------
+ number of iterations   = 11
+ primal objective value = -3.18198051e+00
+ dual   objective value = -3.18198052e+00
+ gap := trace(XZ)       = 1.28e-08
+ relative gap           = 1.74e-09
+ actual relative gap    = 6.93e-10
+ rel. primal infeas     = 2.41e-12
+ rel. dual   infeas     = 3.15e-09
+ norm(X), norm(y), norm(Z) = 1.7e+01, 4.4e+00, 7.9e+00
+ norm(A), norm(b), norm(C) = 2.9e+01, 2.0e+00, 2.4e+00
+ Total CPU time (secs)  = 0.22  
+ CPU time per iteration = 0.02  
+ termination code       =  0
+ DIMACS: 2.4e-12  0.0e+00  3.8e-09  0.0e+00  6.9e-10  1.7e-09
+-------------------------------------------------------------------
+------------------------------------------------------------
+Status: Solved
+Optimal value (cvx_optval): +3.18198
+ 
+Nonzero lambda values for D design:
+lambda(1) = 0.5
+lambda(10) = 0.5
+ 
+Calling SDPT3: 32 variables, 11 equality constraints
+------------------------------------------------------------
+
+ num. of constraints = 11
+ dim. of sdp    var  =  6,   num. of sdp  blk  =  2
+ dim. of linear var  = 20
+*******************************************************************
+   SDPT3: Infeasible path-following algorithms
+*******************************************************************
+ version  predcorr  gam  expon  scale_data
+   HKM      1      0.000   1        0    
+it pstep dstep pinfeas dinfeas  gap      prim-obj      dual-obj    cputime
+-------------------------------------------------------------------
+ 0|0.000|0.000|4.9e+02|4.7e+01|5.6e+03| 2.000000e+01  0.000000e+00| 0:0:00| chol  1  1 
+ 1|0.926|0.999|3.6e+01|1.2e-01|4.2e+02| 1.663772e+01 -2.905847e+01| 0:0:00| chol  1  1 
+ 2|0.950|1.000|1.8e+00|1.0e-02|4.1e+01| 1.545943e+00 -2.335057e+01| 0:0:00| chol  1  1 
+ 3|1.000|1.000|3.0e-07|1.0e-03|6.4e+00| 1.636822e+00 -4.755167e+00| 0:0:00| chol  1  1 
+ 4|0.917|0.879|1.2e-07|2.1e-04|8.7e-01| 1.221243e+00  3.518119e-01| 0:0:00| chol  1  1 
+ 5|1.000|1.000|2.4e-08|1.0e-05|5.9e-01| 1.101610e+00  5.104357e-01| 0:0:00| chol  1  1 
+ 6|0.973|0.976|2.4e-09|1.2e-06|9.8e-02| 9.168349e-01  8.188437e-01| 0:0:00| chol  1  1 
+ 7|1.000|1.000|1.7e-09|1.0e-07|4.1e-02| 8.744063e-01  8.336361e-01| 0:0:00| chol  1  1 
+ 8|0.971|0.970|8.9e-10|1.3e-08|1.5e-03| 8.505205e-01  8.490159e-01| 0:0:00| chol  1  1 
+ 9|0.988|0.986|3.2e-10|1.3e-09|1.9e-05| 8.495403e-01  8.495208e-01| 0:0:00| chol  1  1 
+10|0.999|0.997|2.4e-13|6.9e-11|3.3e-07| 8.495281e-01  8.495278e-01| 0:0:00| chol  1  1 
+11|1.000|1.000|7.0e-12|1.0e-12|1.1e-08| 8.495279e-01  8.495279e-01| 0:0:00|
+  stop: max(relative gap, infeasibilities) &lt; 1.49e-08
+-------------------------------------------------------------------
+ number of iterations   = 11
+ primal objective value =  8.49527931e-01
+ dual   objective value =  8.49527921e-01
+ gap := trace(XZ)       = 1.08e-08
+ relative gap           = 3.99e-09
+ actual relative gap    = 3.99e-09
+ rel. primal infeas     = 7.02e-12
+ rel. dual   infeas     = 1.00e-12
+ norm(X), norm(y), norm(Z) = 8.1e+00, 1.7e+00, 2.8e+00
+ norm(A), norm(b), norm(C) = 4.0e+01, 2.7e+00, 2.4e+00
+ Total CPU time (secs)  = 0.18  
+ CPU time per iteration = 0.02  
+ termination code       =  0
+ DIMACS: 9.6e-12  0.0e+00  1.2e-12  0.0e+00  4.0e-09  4.0e-09
+-------------------------------------------------------------------
+------------------------------------------------------------
+Status: Solved
+Optimal value (cvx_optval): +0.849528
+ 
+Nonzero lambda values for A design:
+lambda(1) = 0.2966
+lambda(10) = 0.37797
+lambda(20) = 0.32543
+ 
+Calling SDPT3: 24 variables, 4 equality constraints
+------------------------------------------------------------
+
+ num. of constraints =  4
+ dim. of sdp    var  =  2,   num. of sdp  blk  =  1
+ dim. of linear var  = 20
+ dim. of free   var  =  1 *** convert ublk to lblk
+*******************************************************************
+   SDPT3: Infeasible path-following algorithms
+*******************************************************************
+ version  predcorr  gam  expon  scale_data
+   HKM      1      0.000   1        0    
+it pstep dstep pinfeas dinfeas  gap      prim-obj      dual-obj    cputime
+-------------------------------------------------------------------
+ 0|0.000|0.000|4.8e+02|4.7e+01|5.2e+03|-2.875957e-10  0.000000e+00| 0:0:00| chol  1  1 
+ 1|0.970|0.720|1.5e+01|1.3e+01|2.3e+02| 5.239168e+00 -1.929069e+01| 0:0:00| chol  1  1 
+ 2|1.000|0.979|1.9e-06|2.8e-01|2.5e+01| 3.638124e+00 -1.987258e+01| 0:0:00| chol  1  1 
+ 3|1.000|0.493|5.1e-07|1.4e-01|1.5e+01|-2.120931e-01 -1.518800e+01| 0:0:00| chol  1  1 
+ 4|1.000|0.880|5.0e-06|1.7e-02|2.0e+00|-6.785315e-01 -2.651558e+00| 0:0:00| chol  1  1 
+ 5|1.000|0.093|4.7e-08|1.6e-02|1.5e+00|-1.131853e+00 -2.590894e+00| 0:0:00| chol  1  1 
+ 6|1.000|0.631|8.8e-08|5.8e-03|7.5e-01|-1.431151e+00 -2.171634e+00| 0:0:00| chol  1  1 
+ 7|1.000|0.583|4.6e-08|2.4e-03|2.4e-01|-1.724221e+00 -1.960989e+00| 0:0:00| chol  1  1 
+ 8|0.998|0.959|2.2e-08|9.8e-05|8.1e-03|-1.797089e+00 -1.805145e+00| 0:0:00| chol  1  1 
+ 9|0.988|0.988|8.7e-10|1.2e-06|9.5e-05|-1.799966e+00 -1.800060e+00| 0:0:00| chol  1  1 
+10|0.989|0.989|1.7e-10|9.4e-07|3.1e-06|-1.800000e+00 -1.800001e+00| 0:0:00| chol  1  1 
+11|1.000|0.989|1.7e-11|3.0e-08|1.0e-07|-1.800000e+00 -1.800000e+00| 0:0:00| chol  1  1 
+12|1.000|0.989|3.3e-12|1.0e-09|3.3e-09|-1.800000e+00 -1.800000e+00| 0:0:00|
+  stop: max(relative gap, infeasibilities) &lt; 1.49e-08
+-------------------------------------------------------------------
+ number of iterations   = 12
+ primal objective value = -1.80000000e+00
+ dual   objective value = -1.80000000e+00
+ gap := trace(XZ)       = 3.28e-09
+ relative gap           = 7.13e-10
+ actual relative gap    = 2.56e-10
+ rel. primal infeas     = 3.35e-12
+ rel. dual   infeas     = 1.01e-09
+ norm(X), norm(y), norm(Z) = 2.0e+00, 2.1e+00, 5.8e+00
+ norm(A), norm(b), norm(C) = 2.9e+01, 2.0e+00, 2.4e+00
+ Total CPU time (secs)  = 0.20  
+ CPU time per iteration = 0.02  
+ termination code       =  0
+ DIMACS: 3.3e-12  0.0e+00  1.2e-09  0.0e+00  2.6e-10  7.1e-10
+-------------------------------------------------------------------
+------------------------------------------------------------
+Status: Solved
+Optimal value (cvx_optval): +1.8
+ 
+Nonzero lambda values for E design:
+lambda(10) = 0.2
+lambda(20) = 0.8
+</pre>
+<a id="plots"></a>
+<div id="plotoutput">
+<img src="expdesign__01.png" alt=""> <img src="expdesign__02.png" alt=""> <img src="expdesign__03.png" alt=""> <img src="expdesign__04.png" alt=""> 
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,553 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Solvers &mdash; CVX Users&#39; Guide</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0 (beta)',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="CVX Users&#39; Guide" href="index.html" />
+    <link rel="next" title="Reference guide" href="funcref.html" />
+    <link rel="prev" title="Geometric programming mode" href="gp.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="funcref.html" title="Reference guide"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="gp.html" title="Geometric programming mode"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="solvers">
+<span id="id1"></span><h1>Solvers<a class="headerlink" href="#solvers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="supported-solvers">
+<span id="id2"></span><h2>Supported solvers<a class="headerlink" href="#supported-solvers" title="Permalink to this headline">¶</a></h2>
+<p>This version of CVX supports four solvers, each with different capabilities. Support for
+a fifth solver is currently under development:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="58%" />
+<col width="4%" />
+<col width="4%" />
+<col width="6%" />
+<col width="5%" />
+<col width="4%" />
+<col width="9%" />
+<col width="11%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Solver name</th>
+<th class="head">LP</th>
+<th class="head">QP</th>
+<th class="head">SOCP</th>
+<th class="head">SDP</th>
+<th class="head">GP</th>
+<th class="head">Integer</th>
+<th class="head">License?</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference external" href="http://sedumi.ie.lehigh.edu">SeDuMi</a></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>E</td>
+<td>N</td>
+<td>N</td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="http://www.math.nus.edu.sg/~mattohkc/sdpt3.html">SDPT3</a></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>E</td>
+<td>N</td>
+<td>N</td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="http://gurobi.com">Gurobi</a></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>N</td>
+<td>N</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="http://mosek.com">MOSEK</a></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y*</td>
+<td>E</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+</tbody>
+</table>
+<p>(key: Y = Yes, N = No, E = Experimental, * = Mosek 7 or later is required.)</p>
+<p>Each solver has different capabilities and different levels of performance. For instance,
+SeDuMi <a class="reference internal" href="credits.html#stu99">[Stu99]</a> and SDPT3 <a class="reference internal" href="credits.html#ttt03">[TTT03]</a> support all of the continuous (non-integer) models
+that CVX itself supports, while  Gurobi, MOSEK, and GLPK are more limited. On the other hand,
+these latter solvers all support integer constraints, while SeDuMi and SDPT3 do not.</p>
+<p>SeDuMi and SDPT3 are included with the CVX distribution, so you do not need to download
+an additional solver to start using CVX. We have reached agreements with both Gurobi
+Optimization and MOSEK ApS to bundle their solvers with CVX. We will make an announcement
+and update this documentation once the bundling implementation has been completed.</p>
+<p>If you are having difficulty with one solver, please try another. No one solver performs
+better than the others on <em>every</em> model CVX can generate&#8212;including commercial solvers.
+That said, if you encounter a problem that one solver can handle well and another
+cannot, please send us a bug report (see <a class="reference internal" href="support.html#support"><em>Support</em></a>) and we will forward the
+results to the solver&#8217;s authors.</p>
+<p>We have created special sections in this user guide for using Gurobi and MOSEK with CVX:</p>
+<ul class="simple">
+<li>Gurobi: <a class="reference internal" href="gurobi.html#gurobi"><em>Using Gurobi with CVX</em></a></li>
+<li>Mosek:  <a class="reference internal" href="mosek.html#mosek"><em>Using MOSEK with CVX</em></a></li>
+</ul>
+</div>
+<div class="section" id="selecting-a-solver">
+<span id="solver-selection"></span><h2>Selecting a solver<a class="headerlink" href="#selecting-a-solver" title="Permalink to this headline">¶</a></h2>
+<p>The default solver is currently SDPT3. We have found that SeDuMi is faster for most
+problems, but unfortunately not as reliable. None of the solvers are perfect, however,
+and you may find for your application that another solver is preferred.</p>
+<p>To see which solver is currently selected, simply type</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_solver
+</pre></div>
+</div>
+<p>To change the current solver, simply follow the <tt class="docutils literal"><span class="pre">cvx_solver</span></tt> with the name of your
+chosen solver. For example, to select SeDuMi, type</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_solver sedumi
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">cvx_solver</span></tt> command is case insensitive, so <tt class="docutils literal"><span class="pre">cvx_solver</span> <span class="pre">SeDuMi</span></tt>
+will work just fine as well.</p>
+<p>If you issue this command inside a model&#8212;that is, between <tt class="docutils literal"><span class="pre">cvx_begin</span></tt> and
+<tt class="docutils literal"><span class="pre">cvx_end</span></tt> it will change the solver <em>only</em> for that model; the next model will
+use the previous choice. If, only the other hand, you issue a <tt class="docutils literal"><span class="pre">cvx_solver</span></tt> command
+<em>outside</em> of a model, it will change the solver used for the remainder of your Matlab
+session (or until you change it again).</p>
+<p>If you would like to change the default solver <em>permanently</em>&#8212;that is, so that it remains
+the default even if you quit and re-start Matlab&#8212;then make sure it is set properly,
+and then issue the command</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_save_prefs
+</pre></div>
+</div>
+<p>This command saves not only your solver choice, but also your settings for <tt class="docutils literal"><span class="pre">cvx_expert</span></tt>,
+<tt class="docutils literal"><span class="pre">cvx_power_warning</span></tt>, and <tt class="docutils literal"><span class="pre">cvx_precision</span></tt> as well.</p>
+</div>
+<div class="section" id="controlling-screen-output">
+<span id="solver-output"></span><h2>Controlling screen output<a class="headerlink" href="#controlling-screen-output" title="Permalink to this headline">¶</a></h2>
+<p>Once you gain confidence in using CVX and start incorporating it
+into your larger algorithms and programs, you are likely going to want
+to silence the messages it delivers to the screen. To do so, simply add
+the <tt class="docutils literal"><span class="pre">quiet</span></tt> keyword to the <tt class="docutils literal"><span class="pre">cvx_begin</span></tt> command; that is,</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_begin quiet
+    ...
+cvx_end
+</pre></div>
+</div>
+<p>Previous versions of CVX utilized a separate <tt class="docutils literal"><span class="pre">cvx_quiet</span></tt> command
+and that command is still available in this version as well, if you
+prefer it. Entering <tt class="docutils literal"><span class="pre">cvx_quiet</span> <span class="pre">true</span></tt> suppresses screen output from the
+solver, while entering <tt class="docutils literal"><span class="pre">cvx_quiet</span> <span class="pre">false</span></tt> restores the screen output.
+If you enter these commands within a model&#8212;that is, between
+<tt class="docutils literal"><span class="pre">cvx_begin</span></tt> and <tt class="docutils literal"><span class="pre">cvx_end</span></tt>&#8212;it will affect only that model. If you
+enter it <em>outside</em> of a model, it will affect all subsequent models.
+Entering cvx_quiet with no arguments returns the current setting.</p>
+</div>
+<div class="section" id="interpreting-the-results">
+<span id="interpreting"></span><h2>Interpreting the results<a class="headerlink" href="#interpreting-the-results" title="Permalink to this headline">¶</a></h2>
+<p>After a complete CVX specification has been entered and the
+cvx_end command issued, the solver is called to generate a numerical
+result. It proceeds to replace the variables in your model with the
+computed numerical values, and creates the variable cvx_optval
+containing the value of the objective function. It also summarizes the
+result of its efforts in the form of a string named <tt class="docutils literal"><span class="pre">cvx_status</span></tt>. The
+possible values of <tt class="docutils literal"><span class="pre">cvx_status</span></tt> are as follows:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">Solved</span></tt></dt>
+<dd>A complementary (primal and dual) solution has been found. The
+primal and dual variables are replaced with their computed values,
+and the the optimal value of the problem is placed in cvx_optval
+(which, by convention, is <span class="math">\(0\)</span> for feasibility problems).</dd>
+<dt><tt class="docutils literal"><span class="pre">Unbounded</span></tt></dt>
+<dd><p class="first">The solver has determined that the problem is unbounded. The value
+of <tt class="docutils literal"><span class="pre">cvx_optval</span></tt> is set to <tt class="docutils literal"><span class="pre">-Inf</span></tt> for minimizations, and <tt class="docutils literal"><span class="pre">+Inf</span></tt>
+for maximizations. (Feasibility problems, by construction, never
+produce an <tt class="docutils literal"><span class="pre">Unbounded</span></tt> status.) The values of any dual variables
+are replaced with <tt class="docutils literal"><span class="pre">NaN</span></tt>, as the dual problem is in fact
+infeasible.</p>
+<p class="last">For unbounded problems, CVX stores an <em>unbounded direction</em> into
+the problem variables. This is is a <em>direction</em> along which the
+feasible set is unbounded, and the optimal value approaches
+<span class="math">\(\pm\infty\)</span>. It is important to understand that this value is
+very likely <em>not</em> a feasible point. If a feasible point is required,
+the problem should be re-solved as a feasibility problem by omitting
+the objective. Mathematically speaking, given an unbounded direction
+<span class="math">\(v\)</span> and a feasible point <span class="math">\(x\)</span>, <span class="math">\(x+tv\)</span> is feasible
+for all <span class="math">\(t\geq0\)</span>, and the objective tends to <span class="math">\(-\infty\)</span>
+(for minimizations; <span class="math">\(+\infty\)</span> for maximizations) as
+<span class="math">\(t\rightarrow+\infty\)</span> itself.</p>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">Infeasible</span></tt></dt>
+<dd><p class="first">The problem has been proven to be infeasible through the discovery
+of an unbounded direction. The values of the variables are filled
+with <tt class="docutils literal"><span class="pre">NaN</span></tt>, and the value of <tt class="docutils literal"><span class="pre">cvx_optval</span></tt> is set to <tt class="docutils literal"><span class="pre">+Inf</span></tt>
+for minimizations and feasibility problems, and <tt class="docutils literal"><span class="pre">-Inf</span></tt> for
+maximizations.</p>
+<p class="last">Associated with a provably infeasible problem is an <em>unbounded dual
+direction</em>. Appropriate components of this direction are stored in
+the dual variables. Similarly to the <tt class="docutils literal"><span class="pre">Unbounded</span></tt> case, it is
+important to understand that the unbounded dual direction is very
+likely not a feasible dual point.</p>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">Inaccurate/Solved</span></tt>, <tt class="docutils literal"><span class="pre">Inaccurate/Unbounded</span></tt>, <tt class="docutils literal"><span class="pre">Inaccurate/Infeasible</span></tt></dt>
+<dd>These three status values indicate that the solver was unable to
+make a determination to within the default numerical tolerance.
+However, it determined that the results obtained satisfied a
+&#8220;relaxed&#8221; tolerance leve and therefore may still be suitable for
+further use. If this occurs, you should test the validity of the
+computed solution before using it in further calculations. See
+<a class="reference internal" href="#solver-precision"><em>Controlling precision</em></a> for a more advanced
+discussion of solver tolerances and how to make adjustments.</dd>
+<dt><tt class="docutils literal"><span class="pre">Suboptimal</span></tt></dt>
+<dd>This status is possible only for <em>mixed-integer</em> problems. It is
+returned when the branching algorithm has discovered at least one
+feasible integer solution, but it was unable to continue the search
+process to global optimality. This will occur if the solver is
+required to terminate due to a time limit or a forced interruption
+(for example, if the user types <cite>Ctrl-C</cite>.)</dd>
+<dt><tt class="docutils literal"><span class="pre">Failed</span></tt></dt>
+<dd>The solver failed to make sufficient progress towards a solution,
+even to within the &#8220;relaxed&#8221; tolerance setting. The values of
+cvx_optval and primal and dual variables are filled with
+<tt class="docutils literal"><span class="pre">NaN</span></tt>. This result can occur because of numerical problems
+within SeDuMi, often because the problem is particularly &#8220;nasty&#8221; in
+some way (<em>e.g.</em>, a non-zero duality gap).</dd>
+<dt><tt class="docutils literal"><span class="pre">Overdetermined</span></tt></dt>
+<dd>The presolver has determined that the problem has more equality
+constraints than variables, which means that the coefficient matrix
+of the equality constraints is singular. In practice, such problems
+are often, but not always, infeasible. Unfortunately, solvers
+typically cannot handle such problems, so a precise conclusion
+cannot be reached. The situations that most commonly produce an
+Overdetermined result are discussed in <a class="reference internal" href="advanced.html#overdetermined"><em>Overdetermined problems</em></a>.</dd>
+</dl>
+</div>
+<div class="section" id="controlling-precision">
+<span id="solver-precision"></span><h2>Controlling precision<a class="headerlink" href="#controlling-precision" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We consider the modification of solver precision to be an advanced feature, to be
+used sparingly, if at all&#8212;and only after you have become
+comfortable building models in CVX.</p>
+</div>
+<p>Numerical methods for convex optimization are not exact; they compute
+their results to within a predefined numerical precision or tolerance.
+Upon solution of your model, the tolerance level the solver has achieved
+is returned in the <tt class="docutils literal"><span class="pre">cvx_slvtol</span></tt> variable. Attempts to interpret this
+tolerance level in any absolute sense are not recommended. For one
+thing, each solver computes it differently. For another, it depends
+heavily on the considerable transformations that CVX applies to your
+model before delivering it to the solver. So while you may find its
+value interesting we strongly discourage dependence upon it within your
+applications.</p>
+<p>The tolerance levels that CVX selects by default have been inherited
+from some of the underlying solvers being used, with minor modifications.
+CVX actually considers <em>three</em> different tolerance levels
+<span class="math">\(\epsilon_{\text{solver}}\leq\epsilon_{\text{standard}}\leq\epsilon_{\text{reduced}}\)</span>
+when solving a model:</p>
+<ul class="simple">
+<li>The <em>solver tolerance</em> <span class="math">\(\epsilon_{\text{solver}}\)</span> is the level
+requested of the solver. The solver will stop as soon as it achieves
+this level, or until no further progress is possible.</li>
+<li>The <em>standard tolerance</em> <span class="math">\(\epsilon_{\text{standard}}\)</span> is the
+level at which CVX considers the model solved to full precision.</li>
+<li>The <em>reduced tolerance</em> <span class="math">\(\epsilon_{\text{reduced}}\)</span> is the
+level at which CVX considers the model &#8220;inaccurately&#8221; sovled,
+returning a status with the <tt class="docutils literal"><span class="pre">Inaccurate/</span></tt> prefix. If this tolerance
+cannot be achieved, CVX returns a status of <tt class="docutils literal"><span class="pre">Failed</span></tt>, and the
+values of the variables should not be considered reliable.</li>
+</ul>
+<p>(See <a class="reference internal" href="#interpreting"><em>Interpreting the results</em></a> for more information about the
+status messages.) Typically,
+<span class="math">\(\epsilon_{\text{solver}}=\epsilon_{\text{standard}}\)</span>, but setting
+<span class="math">\(\epsilon_{\text{standard}}&lt;\epsilon_{\text{solver}}\)</span> has a useful
+interpretation: it allows the solver to search for more accurate
+solutions without causing an <tt class="docutils literal"><span class="pre">Inaccurate/</span></tt> or <tt class="docutils literal"><span class="pre">Failed</span></tt> condition if
+it cannot do so. The default values of
+<span class="math">\([\epsilon_{\text{solver}},\epsilon_{\text{standard}},\epsilon_{\text{reduced}}]\)</span>
+are set to <span class="math">\([ \epsilon^{1/2}, \epsilon^{1/2}, \epsilon^{1/4} ]\)</span>,
+where <span class="math">\(\epsilon=2.22\times10^{-16}\)</span> is the machine precision. This
+should be quite sufficient for most applications.</p>
+<p>If you wish to modify the tolerances, you may do so using the
+<tt class="docutils literal"><span class="pre">cvx_precision</span></tt> command. There are three ways to invoke this command.
+Called with no arguments, it will print the current tolerance levels
+to the screen; or if called as a function, it will return those levels
+in a 3-element row vector.</p>
+<p>Calling <tt class="docutils literal"><span class="pre">cvx_precision</span></tt> with a string argument allows you to select
+from a set of predefined precision modes:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">cvx_precision</span> <span class="pre">low</span></tt>:
+<span class="math">\([ \epsilon^{3/8}, \epsilon^{1/4}, \epsilon^{1/4} ]\)</span></li>
+<li><tt class="docutils literal"><span class="pre">cvx_precision</span> <span class="pre">medium</span></tt>:
+<span class="math">\([ \epsilon^{1/2}, \epsilon^{3/8}, \epsilon^{1/4} ]\)</span></li>
+<li><tt class="docutils literal"><span class="pre">cvx_precision</span> <span class="pre">default</span></tt>:
+<span class="math">\([ \epsilon^{1/2}, \epsilon^{1/2}, \epsilon^{1/4} ]\)</span></li>
+<li><tt class="docutils literal"><span class="pre">cvx_precision</span> <span class="pre">high</span></tt>:
+<span class="math">\([ \epsilon^{3/4}, \epsilon^{3/4}, \epsilon^{3/8} ]\)</span></li>
+<li><tt class="docutils literal"><span class="pre">cvx_precision</span> <span class="pre">best</span></tt>: <span class="math">\([ 0, \epsilon^{1/2}, \epsilon^{1/4} ]\)</span></li>
+</ul>
+<p>In function mode, these calls look like <tt class="docutils literal"><span class="pre">cvx_precision('low')</span></tt>, etc.
+Note that the <tt class="docutils literal"><span class="pre">best</span></tt> precision settings sets the solver target to
+zero, which means that the solver continues as long as it can make
+progress. It will often be slower than <tt class="docutils literal"><span class="pre">default</span></tt>, but it is just as
+reliable, and sometimes produces more accurate solutions.</p>
+<p>Finally, the <tt class="docutils literal"><span class="pre">cvx_precision</span></tt> command can be called with a scalar, a
+length-2 vector, or a length-3 vector. If you pass it a scalar, it will
+set the solver and standard tolerances to that value, and it will
+compute a default reduced precision value for you. Roughly speaking,
+that reduced precision will be the square root of the standard
+precision, with some bounds imposed to make sure that it stays
+reasonable. If you supply two values, the smaller will be used for the
+solver and standard tolerances, and the larger for the reduced
+tolerance. If you supply three values, their values will be sorted, and
+each tolerance will be set separately.</p>
+<p>The <tt class="docutils literal"><span class="pre">cvx_precision</span></tt> command can be used either <em>within</em> a CVX
+model or <em>outside</em> of it; and its behavior differs in each case. If you
+call it from within a model, <em>e.g.</em>,</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_begin
+    cvx_precision high
+    ...
+cvx_end
+</pre></div>
+</div>
+<p>then the setting you choose will apply only until <tt class="docutils literal"><span class="pre">cvx_end</span></tt> is
+reached. If you call it outside a model, <em>e.g.</em>,</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_precision high
+cvx_begin
+    ...
+cvx_end
+</pre></div>
+</div>
+<p>then the setting you choose will apply <em>globally</em>; that is, to any
+subsequent models that are created and solved. The local approach should
+be preferred in an application where multiple models are constructed and
+solved at different levels of precision.</p>
+<p>If you call <tt class="docutils literal"><span class="pre">cvx_precision</span></tt> in function mode, either with a string or
+a numeric value, it will return as its output the <em>previous</em> precision
+vector&#8212;the same result you would obtain if you called it with no
+arguments. This may seem confusing at first, but this is done so that
+you can save the previous value in a variable, and restore it at the end
+of your calculations; e.g.,</p>
+<div class="highlight-none"><div class="highlight"><pre>cvxp = cvx_precision( &#39;high&#39; );
+cvx_begin
+    ...
+cvx_end
+cvx_precision( cvxp );
+</pre></div>
+</div>
+<p>This is considered good coding etiquette in a larger application where
+multiple CVX models at multiple precision levels may be employed. Of
+course, a simpler but equally courteous approach is to call
+<tt class="docutils literal"><span class="pre">cvx_precision</span></tt> within the CVX model, as described above, so that
+its effect lasts only for that model.</p>
+</div>
+<div class="section" id="advanced-solver-settings">
+<span id="solver-settings"></span><h2>Advanced solver settings<a class="headerlink" href="#advanced-solver-settings" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is an <strong>advanced topic</strong> for users who have a deep understanding of the
+underlying solver they are using, or who have received specific advice from
+the solver&#8217;s developer for improving performance. Improper use of the
+<tt class="docutils literal"><span class="pre">cvx_solver_settings</span></tt> command can cause unpredictable results.</p>
+</div>
+<p>Solvers can be tuned and adjusted in a variety of ways. Solver vendors attempt to select
+default settings that will provide good performance across a broad range of
+problems. But no solver, and no choice of settings, will perform well for every
+possible model. On occasion, it may be worthwhile to give a particular special instructions
+to improve its performance for a specific application. Unfortunately, such settings differ
+from solver to solver, so there is no way for CVX to provide this ability in a verifiable,
+reliable, global fashion.</p>
+<p>Nevertheless, using the new <tt class="docutils literal"><span class="pre">cvx_solver_settings</span></tt> command, you can customize a solver&#8217;s
+settings when a specific model demands it. We cannot emphasize enough that this is an
+<em>expert</em> feature to be employed by experienced modelers only. Indeed, if you are an
+expert, you understand that these warnings are essential:</p>
+<ul class="simple">
+<li>CVX does not check the correctness of the settings you supply. If the solver rejects the
+settings, CVX will fail until you change or remove those settings.</li>
+<li>There is no guarantee that altering the settings will improve performance in any
+way; indeed, it can make the performance worse.</li>
+<li>CVX Research provides <em>no</em> documentation on the specific settings available for each
+solver; you will have to consult the solver&#8217;s own documentation for this.</li>
+<li>The settings set here <em>override</em> any default values CVX may have chosen for each solver.
+Thus in certain cases, using this feature this may actually confuse CVX and cause it to
+misinterpret the results. For this reason, we cannot support all possible
+combinations of custom settings.</li>
+<li>Unless you have turned off solver output completely, CVX will warn you if any custom
+settings are in effect every time you solve model.</li>
+</ul>
+<p>With this warning out of the way, let us introduce <tt class="docutils literal"><span class="pre">cvx_solver_settings</span></tt>. Typing</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_solver_settings
+</pre></div>
+</div>
+<p>at the command prompt provides a listing of the custom settings that have been provided
+for the active solver. Custom settings are <em>specific to each solver</em>. Typing</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_solver_settings -all
+</pre></div>
+</div>
+<p>will provide a full list of the custom settings provided for <em>all</em> solvers.</p>
+<p>To create a new custom setting for the current solver, use this syntax:</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_solver_settings( &#39;{name}&#39;, {value} )
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">{name}</span></tt> must be a valid MATLAB variable/field name. <tt class="docutils literal"><span class="pre">{value}</span></tt> can be <em>any</em> valid Matlab
+object; CVX does not check its value in any way.</p>
+<p>To clear all custom settings for the active solver, type</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_solver_settings -clear
+</pre></div>
+</div>
+<p>To clear just a single setting, type</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_solver_settings -clear {&lt;name&gt;}
+</pre></div>
+</div>
+<p>To clear all settings for all solvers, type</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_solver_settings -clearall
+</pre></div>
+</div>
+<p>The settings created by the <tt class="docutils literal"><span class="pre">cvx_solver_settings</span></tt> command enjoy the same scope as
+<tt class="docutils literal"><span class="pre">cvx_solver</span></tt>, <tt class="docutils literal"><span class="pre">cvx_precision</span></tt>, and so forth. For instance, if you use this command
+<em>within</em> a model&#8212;between <tt class="docutils literal"><span class="pre">cvx_begin</span></tt> and <tt class="docutils literal"><span class="pre">cvx_end</span></tt>&#8212;the changes will apply only
+to that particular model. If you issue the command <em>outside</em> of a particular model, the
+change will persist through the end of the MATLAB session (or until you change it again).
+Finally, if you use the <tt class="docutils literal"><span class="pre">cvx_save_prefs</span></tt> command, any custom settings you have added
+will be saved and restored the next time you start Matlab.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="index.html">
+          <img class="logo" src="_static/cvxrlogo.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Solvers</a><ul>
+<li><a class="reference internal" href="#supported-solvers">Supported solvers</a></li>
+<li><a class="reference internal" href="#selecting-a-solver">Selecting a solver</a></li>
+<li><a class="reference internal" href="#controlling-screen-output">Controlling screen output</a></li>
+<li><a class="reference internal" href="#interpreting-the-results">Interpreting the results</a></li>
+<li><a class="reference internal" href="#controlling-precision">Controlling precision</a></li>
+<li><a class="reference internal" href="#advanced-solver-settings">Advanced solver settings</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="gp.html"
+                        title="previous chapter">Geometric programming mode</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="funcref.html"
+                        title="next chapter">Reference guide</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/solver.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul><h3>Other links</h3>
+<ul class="this-page-menu">
+<li><a href="CVX.pdf" target="_blank">Download the PDF</a></li>
+<li><a href="http://cvxr.com/cvx">CVX home page</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="funcref.html" title="Reference guide"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="gp.html" title="Geometric programming mode"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright © 2012, CVX Research, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

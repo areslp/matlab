@@ -25,18 +25,20 @@ function integer( varargin )
 %
 %   See also BINARY, VARIABLE, VARIABLES.
 
-if nargin < 2 || ~iscellstr( varargin ),
-    error( 'Syntax: integer variable <variable>   or   integer variables <variables>' );
-elseif strcmpi( varargin{1}, 'variable' ),
+if nargin < 2,
+    error( 'Incorrect syntax for INTEGER VARIABLE(S). Type HELP INTEGER for details.' );
+elseif ~iscellstr( varargin ),
+    error( 'All arguments must be strings.' );
+elseif strcmp( varargin{1}, 'variable' ),
     evalin( 'caller', sprintf( '%s ', 'variable', varargin{2:end}, ' integer' ) );
-elseif strcmpi( varargin{1}, 'variables' ),
+elseif strcmp( varargin{1}, 'variables' ),
     for k = 2 : nargin,
         evalin( 'caller', sprintf( '%s ', 'variable', varargin{k}, ' integer' ) );
     end
-else
-    error( 'Syntax: integer variable <variable>   or   integer variables <variables>' );
+else    
+    error( 'Incorrect syntax for INTEGER VARIABLE(S). Type HELP INTEGER for details.' );
 end
 
-% Copyright 2012 CVX Research, Inc.
+% Copyright 2005-2013 CVX Research, Inc.
 % See the file COPYING.txt for full copyright information.
 % The command 'cvx_where' will show where this file is located.

@@ -1,5 +1,5 @@
 function [Z,ZZ,E] = multi_NNLRS(X,lambda,beta,alpha)
-% solve \sum_{i=1}^k(||Z_i||_*+beta||Z_i||_1+lambda||E_i||_{2,1})+alpha||Z||_{2,1}
+% solve \sum_{i=1}^k(||Z_i||_*+beta||Z_i||_1+lambda||E_i||_{2,1})+alpha||ZZ||_{2,1}
 
 tic;
 
@@ -83,14 +83,34 @@ while ~convergenced
     % update S_i
     Sk=S;
     [S, svp]=cellfun(@updateS,xtx,X,E,Y1,Z,S,Y3,eta1,cmu,'UniformOutput',false);
+	% for i=1:k
+		% fprintf(1,'S{%d}, max: %f, min: %f\n',i,max(max(S{i})),min(min(S{i})));
+	% end
     % update J_i
     Jk=J;
     [J]=cellfun(@updateJ,Z,J,Y2,cmu,cbeta,'UniformOutput',false);
+    % for i=1:k
+        % norm(Jk{i}-J{i})
+    % end
     % update Z
-    [F]=cellfun(@updateF,J,Y2,S,Y3,cmu,'UniformOutput',false);
+    [F]=cellfun(@updateF,J,Y2,S,Y3,cmu,'UniformOutput',false); 
+
+    % normalize matrix before L21, then restore them
+    % CO=F;
+    % for i=1:k
+        % FN=sqrt(sum(F{i}.^2,1));
+        % CO{i}=FN; % CO is the column norm of matrix F
+        % F{i}=mnormalize_col(F{i});
+    % end
+    % save_matrix;
+        
     [M]=cellfun(@updateM,F,'UniformOutput',false);
     MM=zeros(k,n*n);
     for i=1:k
+		% TODO: normalize
+		% fprintf(1,'M{%d}, max: %f, min: %f\n',i,max(max(M{i})),min(min(M{i})));
+        % M{i} = (M{i} - min(M{i}(:))) ./ (max(M{i}(:))-min(M{i}(:)));
+		% fprintf(1,'M{%d},max: %f, min: %f\n',i,max(max(M{i})),min(min(M{i})));
         MM(i,:)=M{i};
     end
     ZZ=l21(MM,alpha/(2*mu));
@@ -103,6 +123,9 @@ while ~convergenced
         Z{i}=reshape(ZZ(i,:),n,n)';
         % Z{i}=Z{i}-diag(diag(Z{i}));
         % Z{i}=max(Z{i},0);
+
+        % multiple the CO matrix to Z's columns
+        % Z{i}=Z{i}*repmat(CO{i},size(Z{i},1),1);
     end
     % update E_i
     Ek=E;
@@ -118,8 +141,8 @@ while ~convergenced
     gap=max([Cmax{:}]);
     if mod(iter,50)==0
         fprintf(1,'===========================================================================================================\n');
-        fprintf(1,'gap between two iteration is %f,mu is %f\n',gap,mu);
-        fprintf(1,'iter %d,mu is %f,ResidualX is %f,changeZJ is %f,changeZS is %f\n',iter,mu,changeX,changeZJ,changeZS);
+        fprintf(1,'gap between two iteration is %e,mu is %e\n',gap,mu);
+        fprintf(1,'iter %d,mu is %e,ResidualX is %e,changeZJ is %e,changeZS is %e\n',iter,mu,changeX,changeZJ,changeZS);
         for i=1:k
             fprintf(1,'svp%d %d,',i,svp{i});
         end
@@ -129,7 +152,7 @@ while ~convergenced
     % if changeX <= epsilon && gap <=epsilon2 && changeZJ <= epsilon && changeZS <= epsilon
         convergenced=true;
         fprintf(2,'convergenced, iter is %d\n',iter);
-        fprintf(2,'iter %d,mu is %f,ResidualX is %f,changeZJ is %f,changeZS is %f\n',iter,mu,changeX,changeZJ,changeZS);
+        fprintf(2,'iter %d,mu is %e,ResidualX is %e,changeZJ is %e,changeZS is %e\n',iter,mu,changeX,changeZJ,changeZS);
         for i=1:k
             fprintf(1,'svp%d %d,',i,svp{i});
         end
@@ -199,3 +222,7 @@ function [Y3] = updateY3(Y3,mu,ZSc)
 
 function [] = save_matrix(J,S,Z,iter)
     save(['m' num2str(iter) '.mat'],'J','S','Z');
+    k=length(J);
+    for i=1:k
+
+    end

@@ -1,0 +1,309 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Semidefinite programming mode &mdash; CVX Users&#39; Guide</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0 (beta)',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="CVX Users&#39; Guide" href="index.html" />
+    <link rel="next" title="Geometric programming mode" href="gp.html" />
+    <link rel="prev" title="The DCP ruleset" href="dcp.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="gp.html" title="Geometric programming mode"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="dcp.html" title="The DCP ruleset"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="semidefinite-programming-mode">
+<span id="sdp-mode"></span><h1>Semidefinite programming mode<a class="headerlink" href="#semidefinite-programming-mode" title="Permalink to this headline">¶</a></h1>
+<p>Those who are familiar with <em>semidefinite programming</em> (SDP) know that
+the constraints that utilize the set <tt class="docutils literal"><span class="pre">semidefinite(n)</span></tt> in the discussion
+on <a class="reference internal" href="basics.html#sets"><em>Set membership</em></a> above are, in practice, typically expressed using
+<em>linear matrix inequality</em> (LMI) notation. For example, given
+<span class="math">\(X=X^T\in\mathbf{R}^{n \times n}\)</span>, the constraint
+<span class="math">\(X\succeq 0\)</span> denotes that <span class="math">\(X\in\mathbf{S}^n_+\)</span>; that is,
+that <span class="math">\(X\)</span> is positive semidefinite.</p>
+<p>CVX provides a special <em>SDP mode</em> that allows this LMI notation
+to be employed inside CVX models using Matlab&#8217;s standard inequality
+operators <tt class="docutils literal"><span class="pre">&gt;=</span></tt>, <tt class="docutils literal"><span class="pre">&lt;=</span></tt>. In order to use it, one simply
+begins a model with the statement <tt class="docutils literal"><span class="pre">cvx_begin</span> <span class="pre">sdp</span></tt> or <tt class="docutils literal"><span class="pre">cvx_begin</span> <span class="pre">SDP</span></tt>
+instead of simply <tt class="docutils literal"><span class="pre">cvx_begin</span></tt>.</p>
+<p>When SDP mode is engaged, CVX
+interprets certain inequality constraints in a different manner. To be
+specific:</p>
+<ul>
+<li><p class="first">Equality constraints are interpreted the same (<em>i.e.</em>, elementwise).</p>
+</li>
+<li><p class="first">Inequality constraints involving vectors and scalars are interpreted
+the same; <em>i.e.</em>, elementwise.</p>
+</li>
+<li><p class="first">Inequality constraints involving non-square matrices are
+<em>disallowed</em>; attempting to use them causes an error. If you wish to
+do true elementwise comparison of matrices <tt class="docutils literal"><span class="pre">X</span></tt> and <tt class="docutils literal"><span class="pre">Y</span></tt>, use a
+vectorization operation <tt class="docutils literal"><span class="pre">X(:)</span> <span class="pre">&lt;=</span> <span class="pre">Y(:)</span></tt> or <tt class="docutils literal"><span class="pre">vec(</span> <span class="pre">X</span> <span class="pre">)</span> <span class="pre">&lt;=</span> <span class="pre">vec(</span> <span class="pre">Y</span> <span class="pre">)</span></tt>.
+(<tt class="docutils literal"><span class="pre">vec</span></tt> is a function provided by CVX that is equivalent to the
+colon operation.)</p>
+</li>
+<li><p class="first">Inequality constraints involving real, square matrices are
+interpreted as follows:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="16%" />
+<col width="62%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><p class="first last"><tt class="docutils literal"><span class="pre">X</span> <span class="pre">&gt;=</span> <span class="pre">Y</span></tt></p>
+</td>
+<td><p class="first last">becomes</p>
+</td>
+<td><p class="first last"><tt class="docutils literal"><span class="pre">X</span> <span class="pre">-</span> <span class="pre">Y</span> <span class="pre">==</span> <span class="pre">semidefinite(n)</span></tt></p>
+</td>
+</tr>
+<tr class="row-even"><td><p class="first last"><tt class="docutils literal"><span class="pre">X</span> <span class="pre">&lt;=</span> <span class="pre">Y</span></tt></p>
+</td>
+<td><p class="first last">becomes</p>
+</td>
+<td><p class="first last"><tt class="docutils literal"><span class="pre">Y</span> <span class="pre">-</span> <span class="pre">X</span> <span class="pre">==</span> <span class="pre">semidefinite(n)</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>If either side is complex, then the inequalities are interpreted as follows:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="15%" />
+<col width="64%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><p class="first last"><tt class="docutils literal"><span class="pre">X</span> <span class="pre">&gt;=</span> <span class="pre">Y</span></tt></p>
+</td>
+<td><p class="first last">becomes</p>
+</td>
+<td><p class="first last"><tt class="docutils literal"><span class="pre">X</span> <span class="pre">-</span> <span class="pre">Y</span> <span class="pre">==</span> <span class="pre">hermitian_semidefinite(n)</span></tt></p>
+</td>
+</tr>
+<tr class="row-even"><td><p class="first last"><tt class="docutils literal"><span class="pre">X</span> <span class="pre">&lt;=</span> <span class="pre">Y</span></tt></p>
+</td>
+<td><p class="first last">becomes</p>
+</td>
+<td><p class="first last"><tt class="docutils literal"><span class="pre">Y</span> <span class="pre">-</span> <span class="pre">X</span> <span class="pre">==</span> <span class="pre">hermitian_semidefinite(n)</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li><p class="first">There is one additional restriction: both <tt class="docutils literal"><span class="pre">X</span></tt> and <tt class="docutils literal"><span class="pre">Y</span></tt> must be the
+same size, or one must be the scalar zero. For example, if <tt class="docutils literal"><span class="pre">X</span></tt> and
+<tt class="docutils literal"><span class="pre">Y</span></tt> are matrices of size <tt class="docutils literal"><span class="pre">n</span></tt>,</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="35%" />
+<col width="10%" />
+<col width="35%" />
+<col width="21%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><p class="first last"><tt class="docutils literal"><span class="pre">X</span> <span class="pre">&gt;=</span> <span class="pre">1</span></tt></p>
+</td>
+<td><p class="first last">or</p>
+</td>
+<td><p class="first last"><tt class="docutils literal"><span class="pre">1</span> <span class="pre">&gt;=</span> <span class="pre">Y</span></tt></p>
+</td>
+<td><p class="first last"><em>illegal</em></p>
+</td>
+</tr>
+<tr class="row-even"><td><p class="first last"><tt class="docutils literal"><span class="pre">X</span> <span class="pre">&gt;=</span> <span class="pre">ones(n,n)</span></tt></p>
+</td>
+<td><p class="first last">or</p>
+</td>
+<td><p class="first last"><tt class="docutils literal"><span class="pre">ones(n,n)</span> <span class="pre">&gt;=</span> <span class="pre">Y</span></tt></p>
+</td>
+<td><p class="first last"><em>legal</em></p>
+</td>
+</tr>
+<tr class="row-odd"><td><p class="first last"><tt class="docutils literal"><span class="pre">X</span> <span class="pre">&gt;=</span> <span class="pre">0</span></tt></p>
+</td>
+<td><p class="first last">or</p>
+</td>
+<td><p class="first last"><tt class="docutils literal"><span class="pre">0</span> <span class="pre">&gt;=</span> <span class="pre">Y</span></tt></p>
+</td>
+<td><p class="first last"><em>legal</em></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>In effect, CVX enforces a stricter interpretation of the
+inequality operators for LMI constraints.</p>
+</li>
+<li><p class="first">Note that LMI constraints enforce symmetry (real or Hermitian, as
+appropriate) on their inputs. Unlike
+<a class="reference external" href="http://www.stanford.edu/~boyd/old_software/SDPSOL.html">SDPSOL</a>,
+CVX does not extract the symmetric part for you: you must take
+care to insure symmetry yourself. Since CVX supports the
+declaration of symmetric matrices, this is reasonably
+straightforward. If CVX cannot determine that an LMI is symmetric
+to within a reasonable numeric tolerance, a warning will be issued.
+We have provided a function <tt class="docutils literal"><span class="pre">sym(X)</span></tt> that extracts the symmetric
+part of a square matrix; that is, <tt class="docutils literal"><span class="pre">sym(X)</span> <span class="pre">=</span> <span class="pre">0.5*(X+X')</span></tt>.</p>
+</li>
+<li><p class="first">A dual variable, if supplied, will be applied to the converted
+equality constraint. It will be given a positive semidefinite value
+if an optimal point is found.</p>
+</li>
+</ul>
+<p>So, for example, the CVX model found in the file
+<tt class="file docutils literal"><span class="pre">examples/closest_toeplitz_sdp.m</span></tt>,</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_begin
+    variable Z(n,n) hermitian toeplitz
+    dual variable Q
+    minimize( norm( Z - P, &#39;fro&#39; ) )
+    Z == hermitian_semidefinite( n ) : Q;
+cvx_end
+</pre></div>
+</div>
+<p>can also be written as follows:</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_begin sdp
+    variable Z(n,n) hermitian toeplitz
+    dual variable Q
+    minimize( norm( Z - P, &#39;fro&#39; ) )
+    Z &gt;= 0 : Q;
+cvx_end
+</pre></div>
+</div>
+<p>Many other examples in the CVX example library utilize semidefinite
+constraints; and all of them use SDP mode. To find them, simply search
+for the text <tt class="docutils literal"><span class="pre">cvx_begin</span> <span class="pre">sdp</span></tt> in the <tt class="docutils literal"><span class="pre">examples/</span></tt> subdirectory tree
+using your favorite file search tool. One of these examples is
+reproduced in <a class="reference internal" href="advanced.html#indexed-dual"><em>Indexed dual variables</em></a>.</p>
+<p>Since semidefinite programming is popular, some may wonder why SDP mode
+is not the default behavior. The reason for this is that we place a
+strong emphasis on maintaining consistency between Matlab&#8217;s native
+behavior and that of CVX. Using the <tt class="docutils literal"><span class="pre">&gt;=</span></tt>, <tt class="docutils literal"><span class="pre">&lt;=</span></tt>, <tt class="docutils literal"><span class="pre">&gt;</span></tt>,
+<tt class="docutils literal"><span class="pre">&lt;</span></tt> operators to create LMIs represents a deviation from that ideal.
+For example, the expression <tt class="docutils literal"><span class="pre">Z</span> <span class="pre">&gt;=</span> <span class="pre">0</span></tt> in the example above constrains
+the variable <tt class="docutils literal"><span class="pre">Z</span></tt> to be positive semidefinite. But after the model has
+been solved and <tt class="docutils literal"><span class="pre">Z</span></tt> has been replaced with a numeric value, the
+expression <tt class="docutils literal"><span class="pre">Z</span> <span class="pre">&gt;=</span> <span class="pre">0</span></tt> will test for the <em>elementwise</em> nonnegativity of
+<tt class="docutils literal"><span class="pre">Z</span></tt>. To verify that the numeric value of <tt class="docutils literal"><span class="pre">Z</span></tt> is, in fact, positive
+semidefinite, you must perform a test like <tt class="docutils literal"><span class="pre">min(eig(Z))</span> <span class="pre">&gt;=</span> <span class="pre">0</span></tt>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="index.html">
+          <img class="logo" src="_static/cvxrlogo.png" alt="Logo"/>
+        </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dcp.html"
+                        title="previous chapter">The DCP ruleset</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="gp.html"
+                        title="next chapter">Geometric programming mode</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/sdp.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul><h3>Other links</h3>
+<ul class="this-page-menu">
+<li><a href="CVX.pdf" target="_blank">Download the PDF</a></li>
+<li><a href="http://cvxr.com/cvx">CVX home page</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="gp.html" title="Geometric programming mode"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="dcp.html" title="The DCP ruleset"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright © 2012, CVX Research, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

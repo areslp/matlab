@@ -7,6 +7,7 @@ function cvx_setup( license_file )
 % Clear out the global CVX structure
 global cvx___
 cvx___ = [];
+squares = {};
 nret = false;
 oldpath = '';
 line = '---------------------------------------------------------------------------'; 
@@ -32,7 +33,19 @@ try
     cpath = struct( 'string', '', 'active', false, 'hold', false );
     subs = strcat( [ mpath, fs ], { 'keywords', 'sets' } );
     cpath.string = sprintf( [ '%s', ps ], subs{:} );
-
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Test for signal processing toolbox conflict %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    squares = which( 'square', '-all' );
+    if length( squares ) > 1,
+        squares = squares(~cellfun(@(x)any(strfind(x,[fs,'@cvx',fs])),squares));
+        if length(squares) == 1 || ~strncmp(squares{1},[mpath,fs],length(mpath)+1),
+            squares = {};
+        end
+    end
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Search for saved preferences %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -40,7 +53,9 @@ try
     fprintf( 'Saved preferences...' ); nret = true;
     pfile = [ regexprep( prefdir, [ fsre, 'R\d\d\d\d\w$' ], '' ), fs, 'cvx_prefs.mat' ];
     if exist( pfile, 'file' ),
+        s = warning('off','MATLAB:dispatcher:UnresolvedFunctionHandle');
         oprefs = load( pfile );
+        warning(s);
         fprintf( 'found.\n' ); 
         nret = false;
     else
@@ -80,7 +95,7 @@ try
     solvers = { solvers(~[solvers.isdir]).name };
     solvers = solvers( ~cellfun( @isempty, regexp( solvers, '\.(m|p)$' ) ) );
     solvers = unique( cellfun( @(x)x(1:end-2), solvers, 'UniformOutput', false ) );
-    solvers = struct( 'name', '', 'version', '', 'location', '', 'fullpath', '', 'error', '', 'warning', '', 'dualize', '', 'path', '', 'check', [], 'solve', [], 'settings', [], 'sname', solvers, 'spath', shimpath, 'params', [] );
+    solvers = struct( 'name', '', 'version', '', 'location', '', 'fullpath', '', 'error', '', 'warning', '', 'dualize', '', 'path', '', 'check', [], 'solve', [], 'settings', [], 'sname', solvers, 'spath', shimpath, 'params', [], 'eargs', {{}} );
     solver2 = which( 'cvx_solver_shim', '-all' );
     for k = 1 : length(solver2),
         tsolv = solver2{k};
@@ -312,6 +327,20 @@ try
             fprintf( 'startup.m file and its proper placement and usage.\n' );
         end
     end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Warn about signal processing toolbox conflict %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    if ~isempty(squares),
+        fprintf( '%s\n', line );
+        fprintf('WARNING: CVX includes a function\n    %s\n', squares{1} );
+        fprintf('that conflicts with a function of the same name found here:\n    %s\n', squares{2} );
+        fprintf('If you wish to use this second function, you will need to rename or delete\n' );
+        fprintf('the CVX version, as it will likely produce different results. This will not\n' );
+        fprintf('affect the use of SQUARE() within CVX models, because CVX relies on a\n' );
+        fprintf('different, internal version of SQUARE() when constructing CVX models.\n')
+    end
 
 catch errmsg
 
@@ -348,6 +377,6 @@ end
 
 fprintf( '%s\n\n', line );
 
-% Copyright 2012 CVX Research, Inc.
+% Copyright 2005-2013 CVX Research, Inc.
 % See the file COPYING.txt for full copyright information.
 % The command 'cvx_where' will show where this file is located.

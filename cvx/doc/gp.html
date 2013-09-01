@@ -1,0 +1,253 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Geometric programming mode &mdash; CVX Users&#39; Guide</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0 (beta)',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="CVX Users&#39; Guide" href="index.html" />
+    <link rel="next" title="Solvers" href="solver.html" />
+    <link rel="prev" title="Semidefinite programming mode" href="sdp.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="solver.html" title="Solvers"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="sdp.html" title="Semidefinite programming mode"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="geometric-programming-mode">
+<span id="gp-mode"></span><h1>Geometric programming mode<a class="headerlink" href="#geometric-programming-mode" title="Permalink to this headline">¶</a></h1>
+<p>Geometric programs (GPs) are special mathematical programs that can be
+converted to convex form using a change of variables. The convex form of
+GPs can be expressed as DCPs, but CVX also provides a special mode
+that allows a GP to be specified in its native form. CVX will
+automatically perform the necessary conversion, compute a numerical
+solution, and translate the results back to the original problem.</p>
+<p>To utilize GP mode, you must begin your CVX specification with the
+command <tt class="docutils literal"><span class="pre">cvx_begin</span> <span class="pre">gp</span></tt> or <tt class="docutils literal"><span class="pre">cvx_begin</span> <span class="pre">GP</span></tt> instead of simply
+<tt class="docutils literal"><span class="pre">cvx_begin</span></tt>. For example, the following code, found in the example
+library at <tt class="file docutils literal"><span class="pre">gp/max_volume_box.m</span></tt>, determines the maximum volume box
+subject to various area and ratio constraints:</p>
+<div class="highlight-none"><div class="highlight"><pre>cvx_begin gp
+    variables w h d
+    maximize( w * h * d )
+    subject to
+        2*(h*w+h*d) &lt;= Awall;
+        w*d &lt;= Afloor;
+        alpha &lt;= h/w &gt;= beta;
+        gamma &lt;= d/w &lt;= delta;
+cvx_end
+</pre></div>
+</div>
+<p>As the example illustrates, CVX supports the construction of
+monomials and posynomials using addition, multiplication, division (when
+appropriate), and powers. In addition, CVX supports the construction
+of <em>generalized geometric programs</em> (GGPs), by permitting the use of
+<em>generalized posynomials</em> wherever posynomials are permitted in standard
+GP. More information about generalized geometric programs is provided in
+this
+<a class="reference external" href="http://www.stanford.edu/~boyd/papers/gp_tutorial.html">tutorial</a>.</p>
+<p>The solvers used in this version of CVX do not support geometric
+programming natively. Instead, they are solved using the successive
+approximation technique described in <a class="reference internal" href="advanced.html#successive"><em>The successive approximation method</em></a>.
+This means that solving GPs can be slow, but for small and medium sized problems, the method
+works well.</p>
+<p>In the remainder of this section, we will describe specific rules that
+apply when constructing models in GP mode.</p>
+<div class="section" id="top-level-rules">
+<h2>Top-level rules<a class="headerlink" href="#top-level-rules" title="Permalink to this headline">¶</a></h2>
+<p>CVX supports three types of geometric programs:</p>
+<ul class="simple">
+<li>A <em>minimization problem</em>, consisting of a generalized posynomial
+objective and zero or more constraints.</li>
+<li>A <em>maximization problem</em>, consisting of a <em>monomial</em> objective and
+zero or more constraints.</li>
+<li>A <em>feasibility problem</em>, consisting of one or more constraints.</li>
+</ul>
+<p>The asymmetry between minimizations and maximizations&#8212;specifically,
+that only monomial objectives are allowed in the latter&#8212;is an
+unavoidable artifact of the geometry of GPs and GGPs.</p>
+</div>
+<div class="section" id="constraints">
+<h2>Constraints<a class="headerlink" href="#constraints" title="Permalink to this headline">¶</a></h2>
+<p>Three types of constraints may be specified in geometric programs:</p>
+<ul class="simple">
+<li>An <em>equality constraint</em>, constructed using <tt class="docutils literal"><span class="pre">==</span></tt>, where both sides
+are monomials.</li>
+<li>A <em>less-than inequality constraint</em> <tt class="docutils literal"><span class="pre">&lt;=</span></tt> where the left side is a
+generalized posynomial and the right side is a monomial.</li>
+<li>A <em>greater-than inequality constraint</em> <tt class="docutils literal"><span class="pre">&gt;=</span></tt> where the left side is
+a monomial and the right side is a generalized posynomial.</li>
+</ul>
+<p>As with DCPs, non-equality constraints are not permitted; and while
+strict inequalities <tt class="docutils literal"><span class="pre">&lt;</span></tt>, <tt class="docutils literal"><span class="pre">&gt;</span></tt> are supported, they are treated as
+non-strict inequalities and should therefore be avoided.</p>
+</div>
+<div class="section" id="expressions">
+<h2>Expressions<a class="headerlink" href="#expressions" title="Permalink to this headline">¶</a></h2>
+<p>The basic building blocks of generalized geometric programming are
+monomials, posynomials, and generalized posynomials. A valid monomial is</p>
+<ul class="simple">
+<li>a declared variable;</li>
+<li>the product of two or more monomials;</li>
+<li>the ratio of two monomials;</li>
+<li>a monomial raised to a real power; or</li>
+<li>a call to one of the following functions with monomial arguments:
+<tt class="docutils literal"><span class="pre">prod</span></tt>, <tt class="docutils literal"><span class="pre">cumprod</span></tt>, <tt class="docutils literal"><span class="pre">geo_mean</span></tt>, <tt class="docutils literal"><span class="pre">sqrt</span></tt>.</li>
+</ul>
+<p>A valid posynomial expression is</p>
+<ul class="simple">
+<li>a valid monomial;</li>
+<li>the sum of two or more posynomials;</li>
+<li>the product of two or more posynomials;</li>
+<li>the ratio of a posynomial and a monomial;</li>
+<li>a posynomial raised to a positive integral power; or</li>
+<li>a call to one of the following functions with posynomial arguments:
+<tt class="docutils literal"><span class="pre">sum</span></tt>, <tt class="docutils literal"><span class="pre">cumsum</span></tt>, <tt class="docutils literal"><span class="pre">mean</span></tt>, <tt class="docutils literal"><span class="pre">prod</span></tt>, <tt class="docutils literal"><span class="pre">cumprod</span></tt>.</li>
+</ul>
+<p>A valid generalized posynomial expression is</p>
+<ul class="simple">
+<li>a valid posynomial;</li>
+<li>the sum of two or more generalized posynomials;</li>
+<li>the product of two or more generalized posynomials;</li>
+<li>the ratio of a generalized posynomial and a monomial;</li>
+<li>a generalized posynomial raised to a positive real power; or</li>
+<li>a call to one of the following functions with arguments that are
+generalized posynomials: <tt class="docutils literal"><span class="pre">sum</span></tt>, <tt class="docutils literal"><span class="pre">cumsum</span></tt>, <tt class="docutils literal"><span class="pre">mean</span></tt>, <tt class="docutils literal"><span class="pre">prod</span></tt>,
+<tt class="docutils literal"><span class="pre">cumprod</span></tt>, <tt class="docutils literal"><span class="pre">geo_mean</span></tt>, <tt class="docutils literal"><span class="pre">sqrt</span></tt>, <tt class="docutils literal"><span class="pre">norm</span></tt>, <tt class="docutils literal"><span class="pre">sum_largest</span></tt>,
+<tt class="docutils literal"><span class="pre">norm_largest</span></tt>.</li>
+</ul>
+<p>It is entirely possible to create and manipulate arrays of monomials,
+posynomials, and/or generalized posynomials in CVX, in which case
+these rules extend in an obvious manner. For example, the product of two
+monomial matrices produces a matrix whose entries are polynomials (or monomials
+in special cases).</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="index.html">
+          <img class="logo" src="_static/cvxrlogo.png" alt="Logo"/>
+        </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Geometric programming mode</a><ul>
+<li><a class="reference internal" href="#top-level-rules">Top-level rules</a></li>
+<li><a class="reference internal" href="#constraints">Constraints</a></li>
+<li><a class="reference internal" href="#expressions">Expressions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sdp.html"
+                        title="previous chapter">Semidefinite programming mode</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="solver.html"
+                        title="next chapter">Solvers</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/gp.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul><h3>Other links</h3>
+<ul class="this-page-menu">
+<li><a href="CVX.pdf" target="_blank">Download the PDF</a></li>
+<li><a href="http://cvxr.com/cvx">CVX home page</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="solver.html" title="Solvers"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="sdp.html" title="Semidefinite programming mode"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright © 2012, CVX Research, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

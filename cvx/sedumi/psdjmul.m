@@ -1,13 +1,13 @@
-%                                                    y = psdmul(x,y, K)
+function z = psdjmul(x,y, K)
+% z = psdmul(x,y, K)
+%
 % PSDMUL  for full x,y. Computes (XY+YX)/2
 %
 % **********  INTERNAL FUNCTION OF SEDUMI **********
 %
 % See also sedumi
 
-function y = psdmul(x,y, K) %#ok
-%
-% This file is part of SeDuMi 1.1 by Imre Polik and Oleksandr Romanko
+% This file is part of SeDuMi 1.3 by Imre Polik
 % Copyright (C) 2005 McMaster University, Hamilton, CANADA  (since 1.1)
 %
 % Copyright (C) 2001 Jos F. Sturm (up to 1.05R5)
@@ -37,7 +37,37 @@ function y = psdmul(x,y, K) %#ok
 % 02110-1301, USA
 %
 
-disp('The SeDuMi binaries are not installed.')
-disp('In Matlab, launch "install_sedumi" in the folder you put the SeDuMi files.')
-disp('For more information see the file Install.txt.')
-error(' ')
+Ks = K.s;
+if isempty(Ks),
+    z = [];
+    return
+end
+Kq = Ks .* Ks;
+nr = K.rsdpN;
+nc = length(Ks);
+N  = K.N - K.sblkstart(1) + 1;
+z  = zeros(N,1);
+xi = length(x) - N;
+zi = 0;
+for i = 1 : nc,
+    ki = Ks(i);
+    qi = Kq(i);
+    XX = x(xi+1:xi+qi);
+    YY = y(xi+1:xi+qi);
+    xi = xi + qi;
+    if i > nr,
+        XX = XX + 1j * x(xi+1:xi+qi);
+        YY = YY + 1j * y(xi+1:xi+qi);
+        xi = xi + qi;
+    end
+    XX = reshape(XX,ki,ki);
+    YY = reshape(YY,ki,ki);
+    ZZ = XX * YY;
+    ZZ = 0.5 * ( ZZ + ZZ' );
+    z(zi+1:zi+qi) = real(ZZ);
+    zi = zi + qi;
+    if i > nr,
+        z(zi+1:zi+qi) = imag(ZZ);
+        zi = zi + qi;
+    end
+end

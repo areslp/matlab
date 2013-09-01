@@ -1,11 +1,11 @@
-%                                      [At,b,c,K,prep] = pretransfo(At,b,c,K)
+function [At,b,c,K,prep,origcoeff] = pretransfo(At,b,c,K,pars)
+% [At,b,c,K,prep] = pretransfo(At,b,c,K)
+%
 % PRETRANSFO  Checks data and then transforms into internal SeDuMi format.
 %
 % **********  INTERNAL FUNCTION OF SEDUMI **********
 %
 % See also sedumi
-
-function [At,b,c,K,prep,origcoeff] = pretransfo(At,b,c,K,pars)
 
 % This file is part of SeDuMi 1.1 by Imre Polik and Oleksandr Romanko
 % Copyright (C) 2005 McMaster University, Hamilton, CANADA  (since 1.1)
@@ -85,7 +85,7 @@ elseif ~isempty(K.s)
     if min(K.s < 1) || any(K.s~= floor(K.s))
         error('K.s should contain only positive integers')
     end
-    if size(K.s,1) > 1
+    if size(K.s,2) > 1
         K.s = K.s';
     end
 end
@@ -159,9 +159,9 @@ end
 if N ~= size(c,1)                     % make c an N x 1 vector
     c = c';
 end
-if N <= m
-    error('Should have length(c) > length(b) in any sensible model')
-end
+% if N <= m
+%     error('Should have length(c) > length(b) in any sensible model')
+% end
 if size(At,2) ~= m
     if m == size(At,1)
         At = At';        %user gave A instead of At.
@@ -220,7 +220,7 @@ sperm = ones(length(K.s),1);
 sperm(cpx.s) = 0;
 sperm = find(sperm);
 K.rsdpN = length(sperm);          % #real sym PSD blocks
-K.s = K.s([vec(sperm); vec(cpx.s)]);
+K.s = K.s([vec(sperm); vec(cpx.s)]');
 prep.cpx = cpx;
 % ----------------------------------------
 % Transform R-cones (rotated Lorentz) into Q-cones (standard Lorentz).
@@ -244,8 +244,8 @@ end
 if cpx.dim>0
     pars.sdp=0;    % No SDP preprocessing for complex problems
 end
-if length(K.s) > 1000 || ~isempty(K.s) && max(K.s) < 10
-    pars.sdp = 0;
+if isempty(K.s) || length(K.s) > 1000 || max(K.s) < 10
+    pars.sdp=0;
 end
 if pars.sdp==1
     Atf=At(1:K.f,:);
@@ -264,6 +264,8 @@ end
 % ------------------------------------------------------------
 if ~isfield(pars,'free')
     pars.free=1;
+elseif pars.free==2 && isempty(K.q) && isempty(K.r) && isempty(K.s),
+    pars.free=0;
 end
 if 0 && pars.free && K.l>0 %temporarily disabled due to a bug
     stest=c(K.f+1:K.f+K.l)-At(K.f+1:K.f+K.l,:)*rand(m,1);
@@ -358,17 +360,11 @@ K.N = length(c);
 
 %Correct the sparsity structure of the variables, this can save a lot of
 %memory.
-[i j s]=find(At);
+%Correct the sparsity structure of the variables, this can save a lot of
+%memory.
+[i,j,s]=find(At);
 At=sparse(i,j,s,K.N,m);
-if spars(c)<2/3
-    [i j s]=find(c);
-    c=sparse(i,j,s,K.N,1);
-else
-    c=full(c);
-end
-if spars(b)<2/3
-    [i j s]=find(b);
-    b=sparse(i,j,s,m,1);
-else
-    b=full(b);
-end
+[i,j,s]=find(c);
+c=sparse(i,j,s,K.N,1);
+[i,j,s]=find(b);
+b=sparse(i,j,s,m,1);

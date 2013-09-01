@@ -1,6 +1,5 @@
 function [ Z, E ] = low_rank( X, lambda, maxIter )
-%LOW_RANK Summary of this function goes here
-%   Detailed explanation goes here
+% ||J||_*+lambda||E||_{2,1} s.t. X=XZ+E,Z=J
 
 d=size(X,1);
 n=size(X,2);
@@ -32,7 +31,7 @@ while true
     % tic
     Y=Z+Y2/mu;
     tau=1/mu;
-    J=singular_value_shrinkage(Y,tau);
+    [J,svp]=singular_value_shrinkage(Y,tau);
     % toc
     % J=max(J,0);
     % 2. update Z
@@ -53,7 +52,7 @@ while true
     mu=min(rho*mu,max_mu);
     % 6. check the convergence
     if max(max(abs(leq1)))<epsilon && max(max(abs(leq2)))<epsilon
-        % fprintf(1,'iter %d, convergenced\n', iter);
+        fprintf(1,'iter %d,svp %d convergenced\n', iter,svp);
         break;
     end
     iter=iter+1;

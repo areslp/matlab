@@ -1,0 +1,263 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CVX Users’ Guide &mdash; CVX Users&#39; Guide</title>
+    
+    <link rel="stylesheet" href="_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Noticia+Text|Droid+Sans+Mono" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0 (beta)',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/jquery.cookie.js"></script>
+    <script type="text/javascript" src="_static/cloud.js"></script>
+    <link rel="top" title="CVX Users&#39; Guide" href="#" />
+    <link rel="next" title="Introduction" href="intro.html" /> 
+  </head>
+  <body>
+    <div class="relbar-top">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+    <li><a href="#">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="cvx-users-guide">
+<h1>CVX Users&#8217; Guide<a class="headerlink" href="#cvx-users-guide" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#what-is-cvx">What is CVX?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#what-s-new">What&#8217;s new?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#what-is-disciplined-convex-programming">What is disciplined convex programming?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#mixed-integer-problems">Mixed integer problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#what-cvx-is-not">What CVX is <em>not</em></a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#licensing">Licensing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#supported-platforms">Supported platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#installation-instructions">Installation instructions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#installing-a-cvx-professional-license">Installing a CVX Professional license</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#solvers-included-with-cvx">Solvers included with CVX</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">A quick start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#least-squares">Least squares</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#bound-constrained-least-squares">Bound-constrained least squares</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#other-norms-and-functions">Other norms and functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#other-constraints">Other constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#an-optimal-trade-off-curve">An optimal trade-off curve</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basics.html">The Basics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#cvx-begin-and-cvx-end"><tt class="docutils literal"><span class="pre">cvx_begin</span></tt> and <tt class="docutils literal"><span class="pre">cvx_end</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#variables">Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#objective-functions">Objective functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#constraints">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#set-membership">Set membership</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#dual-variables">Dual variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#assignment-and-expression-holders">Assignment and expression holders</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dcp.html">The DCP ruleset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dcp.html#a-taxonomy-of-curvature">A taxonomy of curvature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dcp.html#top-level-rules">Top-level rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dcp.html#constraints">Constraints</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dcp.html#strict-inequalities">Strict inequalities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dcp.html#expression-rules">Expression rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dcp.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dcp.html#compositions">Compositions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dcp.html#monotonicity-in-nonlinear-compositions">Monotonicity in nonlinear compositions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dcp.html#scalar-quadratic-forms">Scalar quadratic forms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sdp.html">Semidefinite programming mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gp.html">Geometric programming mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#top-level-rules">Top-level rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#constraints">Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp.html#expressions">Expressions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">Solvers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="solver.html#supported-solvers">Supported solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver.html#selecting-a-solver">Selecting a solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver.html#controlling-screen-output">Controlling screen output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver.html#interpreting-the-results">Interpreting the results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver.html#controlling-precision">Controlling precision</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solver.html#advanced-solver-settings">Advanced solver settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="funcref.html">Reference guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="funcref.html#arithmetic-operators">Arithmetic operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="funcref.html#built-in-functions">Built-in functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="funcref.html#linear">Linear</a></li>
+<li class="toctree-l3"><a class="reference internal" href="funcref.html#nonlinear">Nonlinear</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="funcref.html#new-functions">New functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="funcref.html#sets">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="funcref.html#commands">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="support.html#the-cvx-forum">The CVX Forum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="support.html#bug-reports">Bug reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="support.html#what-is-a-bug">What <em>is</em> a bug?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="support.html#handling-numerical-issues">Handling numerical issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="support.html#cvx-professional-support">CVX Professional support</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced topics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#eliminating-quadratic-forms">Eliminating quadratic forms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#indexed-dual-variables">Indexed dual variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#the-successive-approximation-method">The successive approximation method</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advanced.html#suppressing-the-warning">Suppressing the warning</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#power-functions-and-p-norms">Power functions and p-norms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#overdetermined-problems">Overdetermined problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#adding-new-functions-to-the-atom-library">Adding new functions to the atom library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advanced.html#new-functions-via-the-dcp-ruleset">New functions via the DCP ruleset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="advanced.html#new-functions-via-partially-specified-problems">New functions via partially specified problems</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="license.html#cvx-professional-license">CVX Professional License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="license.html#cvx-standard-license">CVX Standard License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="license.html#solver-interfaces">Solver Interfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="license.html#bundled-solvers">Bundled solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="license.html#example-library">Example library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="license.html#no-warranty">No Warranty</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing CVX</a></li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">Credits and Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gurobi.html">Using Gurobi with CVX</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gurobi.html#about-gurobi">About Gurobi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gurobi.html#using-the-bundled-version-of-gurobi">Using the bundled version of Gurobi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gurobi.html#using-cvx-with-a-standalone-gurobi-installation">Using CVX with a standalone Gurobi installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gurobi.html#selecting-gurobi-as-your-default-solver">Selecting Gurobi as your default solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gurobi.html#obtaining-support-for-cvx-and-gurobi">Obtaining support for CVX and Gurobi</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mosek.html">Using MOSEK with CVX</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mosek.html#about-mosek">About MOSEK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mosek.html#using-the-bundled-version-of-mosek">Using the bundled version of MOSEK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mosek.html#using-cvx-with-separate-mosek-installation">Using CVX with separate MOSEK installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mosek.html#selecting-mosek-as-your-default-solver">Selecting MOSEK as your default solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mosek.html#obtaining-support-for-cvx-and-mosek">Obtaining support for CVX and MOSEK</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="#">
+          <img class="logo" src="_static/cvxrlogo.png" alt="Logo"/>
+        </a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="next chapter">Introduction</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul><h3>Other links</h3>
+<ul class="this-page-menu">
+<li><a href="CVX.pdf" target="_blank">Download the PDF</a></li>
+<li><a href="http://cvxr.com/cvx">CVX home page</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             >next</a> &nbsp; &nbsp;</li>
+    <li><a href="#">CVX Users&#39; Guide</a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright © 2012, CVX Research, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

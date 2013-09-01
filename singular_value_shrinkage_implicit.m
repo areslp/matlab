@@ -1,4 +1,4 @@
-function [ U,S,V ] = singular_value_shrinkage( X, tau )
+function [ U,S,V,svp ] = singular_value_shrinkage( X, tau )
 %SINGULAR_VALUE_SHRINKAGE Summary of this function goes here
 %   Detailed explanation goes here
 % tic;

@@ -1,4 +1,6 @@
-%                                                [lab,q] = psdeig(x,K)
+function [lab,q] = psdeig(x,K)
+% [lab,q] = psdeig(x,K)
+%
 % PSDEIG  Computes spectral coefficients of x w.r.t. K
 %   Arguments "q" is optional - without it's considerably faster.
 %   FLOPS indication: 1.3 nk^3 versus 9.0 nk^3 for nk=500,
@@ -8,8 +10,6 @@
 %
 % See also sedumi
 
-function [lab,q] = psdeig(x,K) %#ok
-%
 % This file is part of SeDuMi 1.1 by Imre Polik and Oleksandr Romanko
 % Copyright (C) 2005 McMaster University, Hamilton, CANADA  (since 1.1)
 %
@@ -38,9 +38,46 @@ function [lab,q] = psdeig(x,K) %#ok
 % along with this program; if not, write to the Free Software
 % Foundation, Inc.,  51 Franklin Street, Fifth Floor, Boston, MA
 % 02110-1301, USA
-%
 
-disp('The SeDuMi binaries are not installed.')
-disp('In Matlab, launch "install_sedumi" in the folder you put the SeDuMi files.')
-disp('For more information see the file Install.txt.')
-error(' ')
+Ks = K.s;
+if isempty(Ks),
+    lab = [];
+    return
+end
+Kq = Ks .* Ks;
+nr = K.rsdpN;
+nc = length(Ks);
+N  = sum(Kq) + sum(Kq(nr+1:end));
+xi = length(x) - N;
+ei = 0;
+lab = zeros(sum(Ks),1);
+needv = nargout > 1;
+if needv,
+    q = zeros(N,1);
+    vi = 0;
+end
+for i = 1 : nc,
+    ki = Ks(i);
+    qi = Kq(i);
+    XX = x(xi+1:xi+qi); 
+    xi = xi+qi;
+    if i > nr,
+        XX = XX + 1i*x(xi+1:xi+qi); 
+        xi = xi+qi;
+    end
+    XX = reshape(XX,ki,ki);
+    if needv,
+        [QQ,DD] = eig( XX + XX' );
+        lab(ei+1:ei+ki) = 0.5 * diag(DD);
+        q(vi+1:vi+qi) = real(QQ);
+        vi = vi + qi;
+        if i > nr,
+            q(vi+1:vi+qi) = imag(QQ);
+            vi = vi + qi;
+        end
+    else
+        lab(ei+1:ei+ki) = 0.5 * eig( XX + XX' );
+    end
+    ei = ei + ki;
+end
+

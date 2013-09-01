@@ -11,7 +11,8 @@ function [ fs, ps, mpath, mext, nver, isoctave, problem ] = cvx_version( license
 global cvx___
 
 % File and path separators
-if strncmp( computer, 'PC', 2 ), 
+comp = computer;
+if strncmp( comp, 'PC', 2 ), 
     fs = '\'; 
     ps = ';'; 
 else
@@ -39,24 +40,22 @@ nver = sscanf(nver,'%d');
 nver = nver(1) + 0.01 * ( nver(2) + 0.01 * nver(3) );
 
 % Matlab / Octave flag
-isoctave = exist( 'OCTAVE_VERSION', 'var' );
+isoctave = exist( 'OCTAVE_VERSION', 'builtin' );
 
 if nargout <= 6 && nargout, 
     return; 
 end
 
 % Version and build
-cvx_ver   = '2.0 (beta)';
-cvx_bld = '945';
-cvx_bdate = '2013-03-22 16:32:14';
-cvx_ddate = '2013-02-05 16:29:26';
-cvx_dbld = '918';
+java_version = 0;
+cvx_ver = '2.0 (beta)';
+cvx_bld = '1005';
+cvx_bdate = '2013-08-21 10:54:10';
+cvx_ddate = '2013-07-24 10:54:53';
+cvx_dbld = '994';
 line = '---------------------------------------------------------------------------';
-fprintf( '\n' );
-disp( line );
-fprintf( 'CVX, version %-13s                     (c) 2012, CVX Research, Inc.\n', cvx_ver );
-fprintf( 'Software for Disciplined Convex Programming\n' );
-disp( line );
+fprintf( '\n%s\nCVX, version %-13s                     (c) 2012, CVX Research, Inc.\n', line, cvx_ver );
+fprintf( 'Software for Disciplined Convex Programming\n%s\n', line );
 fprintf( 'Version info:\n' );
 fprintf( '    Code: build %s, %s\n', cvx_bld, cvx_bdate );
 fprintf( '    Documentation: build %s, %s\n', cvx_dbld, cvx_ddate );
@@ -66,7 +65,7 @@ if isoctave,
 else
     verd = ver('MATLAB');
     fprintf( '    MATLAB version: %s %s\n', verd.Version, verd.Release );
-    if usejava('jvm'),
+    if usejava( 'jvm'),
         os_name = char(java.lang.System.getProperty('os.name'));
         os_arch = char(java.lang.System.getProperty('os.arch'));
         os_version = char(java.lang.System.getProperty('os.version'));
@@ -80,11 +79,11 @@ else
                 fprintf('       WARNING: full support for CVX Professional licenses\n' );
                 fprintf('       requres Java version 1.6.0 or later. Please upgrade.\n' );
             end
-        catch %#ok
+        catch
         end
     else
         fprintf( '    Architecture: %s\n', computer );
-        fprintf( '    Java version: DISABLED\n' );
+        fprintf( '    Java version: disabled\n' );
     end
 end
 
@@ -94,15 +93,13 @@ end
 
 problem = true;
 if isoctave,
-    fprintf( 'Sorry, CVX does not yet run under octave.\n' );
+	fprintf( '%s\nSorry, CVX does not yet run under Octave.\n%s\n', line, line );
+elseif nver < 7.08 && strcmp( comp(end-1:end), '64' ),
+    fprintf( '%s\nCVX requires MATLAB 7.8 or later (7.5 or later on 32-bit platforms).\n' , line, line );
 elseif nver < 7.05,
-    fprintf( 'CVX requires MATLAB 7.5 or later.\n' );
+    fprintf( '%s\nCVX requires MATLAB 7.5 or later (7.8 or later on 64-bit platforms).\n' , line, line );
 else
-    problem = false;
-end
-if problem,
-    if ~nargout, clear fs; end
-    return
+	problem = false;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -139,14 +136,16 @@ if fid > 0,
                 if length(missing_f) > 10,
                     fprintf( '        (and %d more files)\n', length(missing_f) - 10 );
                 end
-                disp( '    These omissions may prevent CVX from operating properly.'  );
+                fprintf( '    These omissions may prevent CVX from operating properly.\n'  );
             end
             if ~isempty( additional ),
                 if isempty( missing ), fprintf( '\n' ); end
-                disp( '    WARNING: The following extra files/directories were found:' );
+                fprintf( '    WARNING: The following extra files/directories were found:\n' );
                 isdir = cellfun(@(x)x(end)==fs,additional);
-                additional_d = additional(isdir);
-                additional_f = additional(~isdir);
+                issedumi = cellfun(@any,regexp( additional, [ '^sedumi.*[.]', mexext, '$' ] ));
+                additional_d = additional(isdir&~issedumi);
+                additional_f = additional(~isdir&~issedumi);
+                additional_s = additional(issedumi);
                 while ~isempty( additional_d ),
                     mdir = additional_d{1};
                     ss = strncmp( additional_d, mdir, length(mdir) );
@@ -156,12 +155,24 @@ if fid > 0,
                     additional_f(tt) = [];
                 end
                 for k = 1 : min(length(additional_f),10),
-                    disp( [ '        ', mpath, fs, additional_f{k} ]  );
+                    fprintf( '        %s%s%s\n', mpath, fs, additional_f{k} );
                 end
                 if length(additional_f) > 10,
                     fprintf( '        (and %d more files)\n', length(additional_f) - 10 );
                 end
-                disp( '    These files may alter the behavior of CVX in unsupported ways.' );
+                fprintf( '    These files may alter the behavior of CVX in unsupported ways.\n' );
+                if ~isempty( additional_s ),
+                	fprintf( '    ERROR: obsolete versions of SeDuMi MEX files were found:\n' );
+	                for k = 1 : length(additional_s),
+	                    fprintf( '        %s%s%s\n', mpath, fs, additional_f{k} );
+	            	end
+	            	fprintf( '    These files are now obsolete, and must be removed to ensure\n' );
+	            	fprintf( '    that SeDuMi operates properly and produces sound results.\n' );
+	            	if ~problem,
+		            	fprintf( '    Please remove these files and re-run CVX_SETUP.\n' );
+		            	problem = true;
+		            end
+	            end
             end
         else
             fprintf( '\n    No missing files.\n' );
@@ -169,23 +180,17 @@ if fid > 0,
     else
         fprintf( '\n    No missing files.\n' );
     end
-elseif 0,
-    fid = fopen( [ mpath, fs, 'MANIFEST' ], 'w' );
-    if fid,
-        newman = get_manifest( mpath, fs );
-        fprintf( fid, '%s\n', newman{:} );
-        fclose( fid );
-    end
 else    
     fprintf( 'Manifest missing; cannot verify file structure.\n' ) ;
 end
-if ~exist( [ 'lib/cvx_eliminate_mex.', mext ], 'file' ) || ...
-   ~exist( [ 'lib/cvx_bcompress_mex.', mext ], 'file' ),
-    fprintf( 'ERROR: one or more MEX files for this platform are missing.\n' );
-    fprintf( 'These files end in the suffix ".%s". CVX will not operate\n', mext );
-    fprintf( 'without these files. Please visit\n' );
-    fprintf( '    http://cvxr.com/cvx/download\n' );
-    fprintf( 'And download a distribution targeted for your platform.\n' );
+if ( ~exist( [ 'lib/cvx_eliminate_mex.', mext ], 'file' ) || ...
+     ~exist( [ 'lib/cvx_bcompress_mex.', mext ], 'file' ) ) && ~problem,
+    fprintf( '    ERROR: one or more MEX files for this platform are missing.\n' );
+    fprintf( '    These files end in the suffix ".%s". CVX will not operate\n', mext );
+    fprintf( '    without these files. Please visit\n' );
+    fprintf( '        http://cvxr.com/cvx/download\n' );
+    fprintf( '    And download a distribution targeted for your platform.\n' );
+    problem = true;
 end
 
 %%%%%%%%%%%%%%%%
@@ -194,16 +199,16 @@ end
 
 cvx___.license = [];
 exception = '';
-if usejava( 'jvm' ) && exist( 'cvx_license', 'file' ),
+if java_version >= 1.6 && exist( 'cvx_license', 'file' ),
     try
         if nargin < 1, license_file = ''; end
         cvx___.license = cvx_license( license_file );
     catch exception
     end
-elseif exist( 'cvx_license', 'file' ),
+elseif ~isoctave && exist( 'cvx_license', 'file' ),
     fprintf( 'CVX Professional disabled; requires the Java virtual machine.\n' );
 end
-disp( line );
+fprintf( '%s\n', line );
 if nargout == 0,
     clear fs
     fprintf( '\n' );
@@ -219,7 +224,7 @@ nfiles = dir( mpath );
 ndir   = '';
 dndx   = 0;
 pat2   = '^\.|~$|';
-pat    = '^\.|~$|^cvx_license.mat$|^doc$|^examples$';
+pat    = '^\.|~$|^cvx_license.[md]at$|^doc$|^examples$';
 while true,
     isdir  = [ nfiles.isdir ];
     nfiles = { nfiles.name };
@@ -247,7 +252,6 @@ if ~isequal( fs, '/' ),
 end
 newman = newman(:);
 
-% Copyright 2012 CVX Research, Inc.
+% Copyright 2005-2013 CVX Research, Inc.
 % See the file COPYING.txt for full copyright information.
 % The command 'cvx_where' will show where this file is located.
-

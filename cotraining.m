@@ -40,6 +40,8 @@ for i=1:num_views
     % [V{i}] = mybaseline_spectral_onkernel(K(:,:,i),2,projev);
 end
 
+save V.mat V;
+
 X = V;
 Y = K; Y_norm = Y;
 for i=1:numiter
@@ -69,6 +71,9 @@ if prior==0
 else
     AU=X{prior}(:,1:ceil(numClust*1));
 end
+
+save AU.mat AU;
+save X.mat X;
 
 size(AU)
 

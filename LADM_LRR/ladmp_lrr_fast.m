@@ -86,13 +86,19 @@ while iter<maxIter
     Ak = A;
     
     % E = solve_l1l2(X - XZ + Y/mu,lambda/mu);
+    % tic
     E = l21(X - XZ + Y/mu,lambda/mu);
+    % t=toc;
+    % fprintf(1,'l21 takes=%f\n',t);
     
     %-----------Using PROPACK--------------%
     % tic
     M = A.U*diag(A.s)*A.V' + X'*(X - XZ - E + Y/mu)/eta;
 
+    % tic
     [A.U,A.s,A.V]=singular_value_shrinkage_implicit(M,1/(mu*eta));
+    % t=toc;
+    % fprintf(1,'svs takes=%f\n',t);
     
     % [U, S, V] = lansvd('Axz','Atxz', n, n, sv, 'L', opt);
     % %[U, S, V] = lansvd('Axz','Atxz', n, n, sv, 'L');
@@ -144,7 +150,7 @@ while iter<maxIter
     convergenced = recErr <tol1 && relChg < tol2;
     
     if DEBUG
-        if iter==1 || mod(iter,50)==0 || convergenced
+        if iter==1 || mod(iter,1)==0 || convergenced
             disp(['iter ' num2str(iter) ',mu=' num2str(mu) ...
                 ',rank(Z)=' num2str(svp) ',relChg=' num2str(max(relChgZ,relChgE))...
                 ',recErr=' num2str(recErr)]);

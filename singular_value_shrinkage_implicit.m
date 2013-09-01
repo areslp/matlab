@@ -1,8 +1,11 @@
 function [ U,S,V ] = singular_value_shrinkage( X, tau )
+% tau
 %SINGULAR_VALUE_SHRINKAGE Summary of this function goes here
 %   Detailed explanation goes here
 % tic;
 [U,S,V]=svd(X,'econ');
+% [U,S,V]=svd(X);
+% toc
 % [U,S,V]=lansvd(X);
 S = diag(S);
 svp = length(find(S > tau));

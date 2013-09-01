@@ -28,6 +28,7 @@ global A Xg eta M;%A is the skinny SVD of Z_k, Xg is a copy of X, and M=X-E_{k+1
 % TODO: acc as LRR
 P=orth(X'); % nxr
 r=size(P,2);
+% save P.mat P;
 A=X*P; % 3xr
 
 % solve min ||Z||_* + \lambda ||E||_2,1 s.t. X=AZ+E

@@ -49,6 +49,10 @@ end
 fclose(f);
 
 load spmatrix.txt
+
+% spmatrix
+
+
 A=spconvert(spmatrix);
 num=length(A);
 if size(A,1)~=size(A,2)

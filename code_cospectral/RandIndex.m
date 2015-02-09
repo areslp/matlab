@@ -15,7 +15,7 @@ if nargin < 2 | min(size(c1)) > 1 | min(size(c2)) > 1
    return
 end
 
-C=Contingency(c1,c2);	%form contingency matrix
+C=crosstab(c1,c2);	%form contingency matrix
 
 n=sum(sum(C));
 nis=sum(sum(C,2).^2);		%sum of squares of sums of rows
